@@ -1,0 +1,1260 @@
+:root {
+    --accent: #78dfbc;
+    --accent-dark: #5ed5ae;
+    --accent-light: #baf3df;
+    --accent-pale: #d4f5e9;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f5fffb;
+    color: #173f3a;
+    -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+.app {
+    display: none;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 250px;
+    background: #e7faf3;
+    padding: 25px 18px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #d5eee5;
+    transition: transform 0.25s ease;
+}
+
+.sidebar-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.sidebar-close-btn {
+    display: none;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    color: #285650;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+.sidebar-close-btn:hover {
+    background: var(--accent-pale);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 40, 35, 0.45);
+    z-index: 998;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+.hamburger-btn {
+    display: none;
+    border: none;
+    background: white;
+    font-size: 18px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #173f3a;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.new-chat {
+    background: var(--accent-light);
+    border: none;
+    padding: 13px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 25px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.menu button,
+.sidebar-bottom button {
+    border: none;
+    background: transparent;
+    padding: 11px 12px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #285650;
+}
+
+.menu button:hover,
+.sidebar-bottom button:hover {
+    background: var(--accent-pale);
+}
+
+.menu-title {
+    font-size: 11px;
+    color: #6b9189;
+    margin: 15px 10px 5px;
+    font-weight: bold;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+}
+
+/* MAIN */
+
+.main {
+    flex: 1;
+    padding: 25px 45px;
+}
+
+/* TOPBAR */
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+}
+
+.topbar > div:not(.hamburger-btn):not(.profile) {
+    flex: 1;
+    min-width: 0;
+}
+
+.topbar h2 {
+    font-size: 22px;
+}
+
+.topbar p {
+    color: #71918c;
+    font-size: 13px;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile {
+    background: white;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.profile:hover {
+    transform: scale(1.06);
+}
+
+/* WELCOME */
+
+.welcome {
+    text-align: center;
+    max-width: 700px;
+    margin: 70px auto 35px;
+}
+
+.welcome-icon {
+    font-size: 45px;
+    margin-bottom: 10px;
+}
+
+.welcome h1 {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.welcome h3 {
+    font-size: 22px;
+    font-weight: normal;
+    margin-bottom: 12px;
+}
+
+.welcome p {
+    color: #78938e;
+    line-height: 1.6;
+}
+
+/* CARDS */
+
+.cards {
+    max-width: 900px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    border: 1px solid #e0f1eb;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,100,80,0.10);
+}
+
+.card span {
+    font-size: 28px;
+}
+
+.card h3 {
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+.card p {
+    color: #79938e;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* BIG SEARCH */
+
+.chat-area {
+    max-width: 1000px;
+    margin: 45px auto 0;
+}
+
+.chat-box {
+    background: white;
+    border: 2px solid #bdeee0;
+    border-radius: 30px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    min-height: 72px;
+    box-shadow: 0 12px 35px rgba(0, 120, 100, 0.12);
+}
+
+.chat-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 19px;
+    padding: 15px 18px;
+    color: #173f3a;
+}
+
+.chat-box button {
+    border: none;
+    background: #eefaf6;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 18px;
+}
+
+.chat-box .send {
+    background: var(--accent);
+    font-size: 21px;
+}
+
+.chat-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 17px;
+    padding: 15px;
+    color: #173f3a;
+}
+
+.chat-box input::placeholder {
+    color: #91aaa5;
+}
+
+.chat-box button {
+    border: none;
+    background: #eefaf6;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 6px;
+}
+
+.chat-box .send {
+    background: var(--accent);
+    font-size: 18px;
+}
+
+.small-text {
+    text-align: center;
+    color: #9aada9;
+    font-size: 11px;
+    margin-top: 12px;
+}
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 999;
+        width: 82%;
+        max-width: 300px;
+        transform: translateX(-100%);
+        box-shadow: 0 0 40px rgba(0,0,0,0.25);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-close-btn {
+        display: block;
+    }
+
+    .hamburger-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main {
+        padding: 18px;
+    }
+
+    .topbar h2 {
+        font-size: 18px;
+    }
+
+    .welcome {
+        margin-top: 30px;
+    }
+
+    .welcome h1 {
+        font-size: 32px;
+    }
+
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .teacher-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 18px;
+    }
+
+    .ai-chat {
+        margin: 28px auto 0;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .chat-box input {
+        font-size: 14px;
+    }
+
+    .welcome h1 {
+        font-size: 26px;
+    }
+
+    .welcome h3 {
+        font-size: 17px;
+    }
+
+    .welcome p {
+        font-size: 14px;
+    }
+
+    .topbar p {
+        display: none;
+    }
+
+    .ai-input-box input {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .ai-input-box button {
+        width: 38px;
+        height: 38px;
+    }
+}
+/* LOGIN */
+
+.login-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e9fff7, #e8fbff, #fffbea);
+    padding: 40px 20px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 470px;
+    background: white;
+    padding: 40px;
+    border-radius: 28px;
+    box-shadow: 0 15px 45px rgba(0, 100, 85, 0.12);
+    text-align: center;
+}
+
+.login-logo {
+    font-size: 45px;
+    margin-bottom: 10px;
+}
+
+.login-card h1 {
+    font-size: 28px;
+    color: #173f3a;
+    margin-bottom: 8px;
+}
+
+.login-card > p {
+    color: #78938e;
+    margin-bottom: 25px;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 15px;
+    margin: 7px 0;
+    border: 1px solid #d7eee7;
+    border-radius: 13px;
+    outline: none;
+    font-size: 15px;
+}
+
+.login-card input:focus {
+    border-color: var(--accent);
+}
+
+.login-card h3 {
+    margin: 22px 0 12px;
+    color: #285650;
+}
+
+.role-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.role-buttons button {
+    flex: 1;
+    border: 1px solid #d7eee7;
+    background: #f3fcf8;
+    padding: 12px 5px;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #285650;
+    font-weight: bold;
+}
+
+.role-buttons button:hover {
+    background: #d9f8eb;
+}
+
+.role-buttons button.active {
+    background: var(--accent);
+    border-color: var(--accent-dark);
+    color: #0d2a24;
+    box-shadow: 0 6px 16px rgba(94, 213, 174, 0.35);
+}
+
+.create-account {
+    width: 100%;
+    border: none;
+    margin-top: 25px;
+    padding: 16px;
+    border-radius: 15px;
+    background: var(--accent);
+    color: #173f3a;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.create-account:hover {
+    background: var(--accent-dark);
+}
+.ai-chat {
+    max-width: 900px;
+    margin: 40px auto;
+    text-align: center;
+}
+
+.ai-chat h2 {
+    margin-bottom: 18px;
+    color: #173f3a;
+}
+
+.ai-input-box {
+    background: white;
+    border: 2px solid #bdeee0;
+    border-radius: 28px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 100, 85, 0.10);
+}
+
+.ai-input-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 15px;
+    font-size: 17px;
+}
+
+.ai-input-box button {
+    border: none;
+    background: #eefaf6;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-left: 7px;
+    cursor: pointer;
+}
+
+.ai-input-box .ai-send {
+    background: var(--accent);
+    font-size: 18px;
+}
+
+.ai-chat > p {
+    margin-top: 10px;
+    color: #78938e;
+    font-size: 13px;
+}
+.ai-response {
+    display: none;
+    margin-top: 20px;
+    background: white;
+    border: 1px solid #dcefe9;
+    border-radius: 18px;
+    padding: 18px 22px;
+    text-align: left;
+    color: #285650;
+    box-shadow: 0 8px 25px rgba(0, 100, 85, 0.08);
+}
+
+.ai-response.show {
+    display: block;
+}
+#chat-history {
+    margin-top: 25px;
+    text-align: left;
+}
+
+.history-item {
+    background: white;
+    border: 1px solid #dcefe9;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    color: #285650;
+    box-shadow: 0 5px 18px rgba(0, 100, 85, 0.06);
+}
+
+.history-item strong {
+    color: #173f3a;
+}
+.sidebar-history-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #285650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-history-item:hover {
+    background: var(--accent-pale);
+}
+
+.sidebar-history-item.active {
+    background: var(--accent-light);
+    font-weight: bold;
+}
+
+#leftSidebarHistory.highlight-panel {
+    box-shadow: 0 0 0 3px var(--accent);
+    border-radius: 12px;
+}
+
+.card.highlight-panel {
+    box-shadow: 0 0 0 3px var(--accent), 0 10px 25px rgba(0,100,80,0.15);
+    transition: box-shadow 0.3s ease;
+}
+
+.photo-solution {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #dcefe9;
+    border-radius: 18px;
+    color: #285650;
+    box-shadow: 0 8px 25px rgba(0, 100, 85, 0.08);
+}
+
+.photo-solution.show {
+    display: block;
+}
+/* ===== New tool cards (Quiz, Notes, Mistake, Planner, Translate, Teacher) ===== */
+
+.quiz-card select,
+.notes-card select,
+.mistake-card select,
+.mistake-card textarea,
+.planner-card input,
+.translate-card textarea,
+.translate-card select,
+.lessonplan-card input,
+.lessonplan-card select,
+.report-card-tool input,
+.report-card-tool select,
+.report-card-tool textarea,
+.lesson-explainer-card select,
+.lesson-explainer-card input,
+.sos-card textarea,
+.scratch-card textarea,
+.files-card input[type="file"] {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #d7eee7;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.quiz-card input[type="text"],
+.notes-card input[type="text"] {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #d7eee7;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+}
+
+.quiz-card button,
+.notes-card button,
+.mistake-card button,
+.planner-card button,
+.translate-card button,
+.lessonplan-card button,
+.report-card-tool button,
+.sos-card button,
+.scratch-card button,
+.files-card button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #173f3a;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.quiz-card button:hover,
+.notes-card button:hover,
+.mistake-card button:hover,
+.planner-card button:hover,
+.translate-card button:hover,
+.lessonplan-card button:hover,
+.report-card-tool button:hover,
+.sos-card button:hover,
+.scratch-card button:hover,
+.files-card button:hover {
+    background: var(--accent-dark);
+}
+
+.quiz-card > div,
+.notes-card > div,
+.mistake-card > div,
+.planner-card > div,
+.translate-card > div,
+.lessonplan-card > div,
+.report-card-tool > div,
+.sos-card > div,
+.scratch-card > div,
+.files-card > div {
+    text-align: left;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #285650;
+}
+
+.quiz-answer, .notes-answer, .mistake-answer,
+.planner-answer, .translate-answer,
+.lessonplan-answer, .report-comment-answer {
+    background: #f3fbf8;
+    border: 1px solid #dcefe9;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.quiz-question {
+    margin: 10px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #d7eee7;
+}
+
+.quiz-question label {
+    display: block;
+    margin: 4px 0;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.planner-day {
+    padding: 8px 0;
+    border-bottom: 1px solid #e4f3ee;
+    font-size: 13px;
+}
+
+.teacher-cards {
+    margin-top: 15px;
+}
+
+.teacher-banner {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #16493d, #1f6e59);
+    color: white;
+    border-radius: 18px;
+    padding: 20px 24px;
+    margin-bottom: 6px;
+    box-shadow: 0 12px 30px rgba(15, 61, 51, 0.25);
+}
+
+.teacher-banner span {
+    font-size: 34px;
+    flex-shrink: 0;
+}
+
+.teacher-banner h3 {
+    font-size: 17px;
+    margin-bottom: 4px;
+}
+
+.teacher-banner p {
+    font-size: 13px;
+    color: #cdeee3;
+}
+
+/* ===== Student / Teacher mode buttons ===== */
+
+.mode-btn.active {
+    background: var(--accent-light);
+    font-weight: bold;
+}
+
+/* ===== Modal (Settings / About Zenvyra) ===== */
+
+.upgrade-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 40, 35, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 20px;
+}
+
+.upgrade-modal.show {
+    display: flex;
+}
+
+.upgrade-modal-card {
+    background: white;
+    max-width: 500px;
+    width: 100%;
+    border-radius: 24px;
+    padding: 35px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    border: none;
+    background: #f0f5f3;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.close-modal-btn:hover {
+    background: var(--accent-pale);
+}
+
+.upgrade-logo {
+    font-size: 40px;
+}
+
+.upgrade-modal-card h1 {
+    font-size: 24px;
+    margin: 8px 0;
+    color: #173f3a;
+}
+
+.upgrade-modal-card > p {
+    color: #78938e;
+    margin-bottom: 20px;
+}
+
+.upgrade-note {
+    margin-top: 18px;
+    font-size: 11px;
+    color: #9aada9;
+}
+
+.founder-box {
+    background: #f3fbf8;
+    border: 1px solid #dcefe9;
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 6px;
+    text-align: center;
+}
+
+.founder-box h3 {
+    font-size: 14px;
+    color: #173f3a;
+    margin-bottom: 8px;
+}
+
+.founder-box p {
+    font-size: 13px;
+    color: #4d716b;
+    line-height: 1.6;
+}
+
+/* ===== Settings modal ===== */
+
+.settings-modal-card {
+    text-align: left;
+}
+
+.settings-modal-card > .upgrade-logo,
+.settings-modal-card > h1,
+.settings-modal-card > p {
+    text-align: center;
+}
+
+.settings-section {
+    margin-top: 20px;
+}
+
+.settings-section h3 {
+    font-size: 14px;
+    color: #173f3a;
+    margin-bottom: 8px;
+}
+
+.settings-section input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d7eee7;
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+}
+
+.settings-section input[type="text"]:focus {
+    border-color: var(--accent);
+}
+
+.theme-swatches {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.theme-swatch {
+    border: 3px solid transparent;
+    border-radius: 12px;
+    padding: 14px 10px 8px;
+    min-width: 68px;
+    color: #173f3a;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+}
+
+.theme-swatch.active {
+    border-color: #173f3a;
+}
+
+.settings-danger-btn {
+    width: 100%;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    background: #ffe1e1;
+    color: #7a1f1f;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.settings-danger-btn:hover {
+    background: #ffc9c9;
+}
+
+.settings-logout-section {
+    border-top: 1px solid #eef3f1;
+    margin-top: 24px;
+    padding-top: 18px;
+}
+
+.settings-logout-btn {
+    width: 100%;
+    border: 1px solid #e5d0d0;
+    background: transparent;
+    color: #8a4b4b;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.settings-logout-btn:hover {
+    background: #fff3f3;
+}
+/* ==============================
+   FULL SCREEN WELCOME BOARD ("bombastic" celebration screen)
+   ============================== */
+
+#welcome-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 99999;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 30px 20px;
+
+    background: linear-gradient(-45deg, #0f3d33, #1a6b53, #0e8f6f, #145c4a);
+    background-size: 400% 400%;
+    animation: welcomeGradient 10s ease infinite;
+}
+
+@keyframes welcomeGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#welcome-screen::before,
+#welcome-screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle, rgba(255,255,255,0.55) 2px, transparent 2px),
+        radial-gradient(circle, rgba(255,255,255,0.35) 2px, transparent 2px);
+    background-size: 140px 140px, 90px 90px;
+    background-position: 0 0, 45px 60px;
+    animation: welcomeSparkle 6s linear infinite;
+    opacity: 0.5;
+}
+
+#welcome-screen::after {
+    background-size: 200px 200px, 110px 110px;
+    animation-duration: 11s;
+    animation-direction: reverse;
+    opacity: 0.3;
+}
+
+@keyframes welcomeSparkle {
+    from { transform: translateY(0); }
+    to { transform: translateY(-140px); }
+}
+
+#welcome-screen .welcome-card {
+    width: min(90%, 460px);
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+
+    background: #ffffff;
+    border-radius: 32px;
+    padding: 46px 38px 38px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0, 20, 15, 0.45);
+
+    animation: welcomeCardPop 0.6s cubic-bezier(0.22, 1.4, 0.4, 1) both;
+}
+
+@keyframes welcomeCardPop {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.85);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-6px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.welcome-logo {
+    font-size: 60px;
+    line-height: 1;
+    margin: 0 auto 18px;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-pale) 0%, var(--accent-light) 100%);
+    box-shadow: 0 0 0 8px rgba(120, 223, 188, 0.25);
+    animation: welcomeLogoFloat 3.5s ease-in-out infinite;
+}
+
+@keyframes welcomeLogoFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(6deg); }
+}
+
+.welcome-card h1 {
+    font-size: 27px;
+    color: #173f3a;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+}
+
+#welcome-name {
+    font-size: 17px;
+    color: #285650;
+    margin-bottom: 18px;
+}
+
+.role-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent-light), var(--accent));
+    color: #123a33;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 9px 20px;
+    border-radius: 30px;
+    margin-bottom: 22px;
+    box-shadow: 0 6px 18px rgba(94, 213, 174, 0.35);
+}
+
+.continue-button {
+    width: 100%;
+    border: none;
+    margin-top: 8px;
+    padding: 16px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #0d2a24;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(94, 213, 174, 0.4);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.continue-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(94, 213, 174, 0.5);
+}
+
+.continue-button:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 500px) {
+    #welcome-screen .welcome-card {
+        padding: 36px 24px 28px;
+    }
+
+    .welcome-logo {
+        width: 80px;
+        height: 80px;
+        font-size: 46px;
+    }
+
+    .welcome-card h1 {
+        font-size: 22px;
+    }
+
+    .login-card {
+        padding: 28px 22px;
+    }
+
+    .login-card h1 {
+        font-size: 23px;
+    }
+
+    .role-buttons {
+        flex-wrap: wrap;
+    }
+
+    .role-buttons button {
+        flex: 1 1 45%;
+    }
+
+    .upgrade-modal-card {
+        padding: 26px 20px;
+        border-radius: 20px;
+    }
+}
+
+/* ===== Files tool ===== */
+
+.file-chip {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f3fbf8;
+    border: 1px solid #dcefe9;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #285650;
+}
+
+.file-chip button {
+    border: none;
+    background: transparent;
+    color: #d1435b;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* ===== Voice status line under chat input ===== */
+
+.voice-status {
+    min-height: 16px;
+    font-size: 12px;
+    color: #1a9c6e;
+    margin-top: 6px;
+}
+
+/* ===== Login prototype note ===== */
+
+.login-proto-note {
+    font-size: 11px;
+    color: #79938e;
+    margin-top: -4px;
+    margin-bottom: 4px;
+    text-align: left;
+}
+
+/* ===== Demo/placeholder tag used inside AI result areas ===== */
+
+.demo-tag {
+    font-size: 11px;
+    color: #b57a1f;
+    background: #fff6e6;
+    border: 1px solid #ffe1b0;
+    border-radius: 8px;
+    padding: 4px 8px;
+    display: inline-block;
+    margin: 4px 0 8px;
+}

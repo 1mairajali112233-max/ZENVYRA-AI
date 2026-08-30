@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Zenvyra AI</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+
+            <div class="sidebar-top-row">
+                <div class="logo">
+                    ✨ Zenvyra
+                </div>
+                <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">✕</button>
+            </div>
+
+            <button class="new-chat" id="newChatBtn">＋ New Chat</button>
+
+            <div class="menu-title" id="sidebarHistoryTitle" style="display:none;">CHATS</div>
+            <div class="menu" id="leftSidebarHistory"></div>
+
+            <div class="menu">
+
+                <div class="menu-title">MAIN</div>
+
+                <button id="navAskAiBtn">💬 Ask AI</button>
+                <button id="navStudyHelpBtn">📚 Study Help</button>
+                <button id="sidebarPhotoSolverBtn">📷 Photo Solver</button>
+                <button id="navQuizBtn">📝 Quiz</button>
+
+                <div class="menu-title">MODE</div>
+
+                <button id="studentToolsBtn" class="mode-btn active">🎓 Student Tools</button>
+                <button id="teacherToolsBtn" class="mode-btn">👨‍🏫 Teacher Tools</button>
+
+                <div class="menu-title">LEARNING</div>
+
+                <button class="subject-nav-btn" data-subject="Mathematics">🧮 Math</button>
+                <button class="subject-nav-btn" data-subject="Science">🔬 Science</button>
+                <button class="subject-nav-btn" data-subject="Sindhi">🟢 Sindhi</button>
+                <button class="subject-nav-btn" data-subject="Computer">💻 Computer</button>
+                <button id="navScratchBtn">🐱 Scratch</button>
+
+                <div class="menu-title">TOOLS</div>
+
+                <button id="navFilesBtn">📄 Files</button>
+                <button id="voiceBtn">🎤 Voice</button>
+                <button id="historyToolBtn">🕘 History</button>
+
+            </div>
+
+            <div class="sidebar-bottom">
+                <button id="settingsBtn">⚙️ Settings</button>
+                <button id="aboutZenvyraBtn">👑 About Zenvyra</button>
+            </div>
+
+        </aside>
+
+
+        <!-- Main Area -->
+        <main class="main">
+
+            <header class="topbar">
+
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">☰</button>
+
+                <div>
+                    <h2>✨ Zenvyra AI</h2>
+                    <p id="topbarGreeting">Learn • Create • Discover</p>
+                </div>
+
+                <div class="profile" id="profileBadge" title="Settings">
+                    👤
+                </div>
+
+            </header>
+
+
+            <section class="welcome">
+
+                <div class="welcome-icon">
+                    ✨
+                </div>
+
+                <h1>Hello! 👋</h1>
+
+                <h3>What can I help you with today?</h3>
+
+                <p>
+                    Ask questions, learn new topics, create projects,
+                    or explore something amazing.
+                </p>
+
+            </section>
+
+
+            <!-- Quick Actions -->
+
+            <section class="cards">
+
+                <div class="card sos-card">
+                    <span>🆘</span>
+                    <h3>Student SOS</h3>
+                    <p>Tell me your problem</p>
+
+                    <textarea id="sosProblem" rows="3" placeholder="What are you stuck on? Describe it here…"></textarea>
+
+                    <button id="sosHelpBtn" type="button">🆘 Get Help</button>
+
+                    <div id="sosResult"></div>
+                </div>
+
+                <div class="card">
+                    <span>📸</span>
+                    <h3>Photo Solver</h3>
+                    <input type="file" id="photoInput" accept="image/*">
+                    <button id="solvePhotoBtn" type="button">🔍 Solve Photo</button>
+                    <div id="photoSolution" class="photo-solution"></div>
+                    <p>Upload a question</p>
+                </div>
+
+                <div class="card lesson-explainer-card">
+    <span>📚</span>
+    <h3>Lesson Explainer</h3>
+    <p>Make lessons easy</p>
+
+    <select id="lessonSubject">
+        <option value="">Select Subject</option>
+        <option value="English">📖 English</option>
+        <option value="Mathematics">🧮 Mathematics</option>
+        <option value="Science">🔬 Science</option>
+        <option value="Computer">💻 Computer</option>
+        <option value="Sindhi">🟢 Sindhi</option>
+        <option value="Urdu">📝 Urdu</option>
+        <option value="Social Studies">🌍 Social Studies</option>
+        <option value="Islamiyat">📚 Islamiyat</option>
+    </select>
+
+    <input
+        type="text"
+        id="lessonTopic"
+        placeholder="Enter lesson topic..."
+    >
+
+    <select id="lessonLevel">
+        <option value="">Explanation Level</option>
+        <option value="Easy">🟢 Easy</option>
+        <option value="Normal">🔵 Normal</option>
+        <option value="Detailed">🟣 Detailed</option>
+    </select>
+
+    <select id="lessonClass">
+        <option value="">Select Class</option>
+        <option value="Nursery">Nursery</option>
+        <option value="KG">KG</option>
+        <option value="Grade 1">Grade 1</option>
+        <option value="Grade 2">Grade 2</option>
+        <option value="Grade 3">Grade 3</option>
+        <option value="Grade 4">Grade 4</option>
+        <option value="Grade 5">Grade 5</option>
+        <option value="Grade 6">Grade 6</option>
+        <option value="Grade 7">Grade 7</option>
+        <option value="Grade 8">Grade 8</option>
+        <option value="Grade 9">Grade 9</option>
+        <option value="Grade 10">Grade 10</option>
+        <option value="Grade 11">Grade 11</option>
+        <option value="Grade 12">Grade 12</option>
+    </select>
+
+    <button id="explainLessonBtn" type="button">
+        ✨ Explain Lesson
+    </button>
+
+    <div id="lessonResult"></div>
+</div>
+
+
+                <div class="card quiz-card">
+                    <span>🧠</span>
+                    <h3>Quiz Generator</h3>
+                    <p>Create a practice quiz</p>
+
+                    <input type="text" id="quizTopic" placeholder="Enter topic...">
+
+                    <select id="quizCount">
+                        <option value="3">3 Questions</option>
+                        <option value="5" selected>5 Questions</option>
+                        <option value="10">10 Questions</option>
+                    </select>
+
+                    <select id="quizDifficulty">
+                        <option value="Easy">🟢 Easy</option>
+                        <option value="Medium" selected>🔵 Medium</option>
+                        <option value="Hard">🟣 Hard</option>
+                    </select>
+
+                    <button id="generateQuizBtn" type="button">🧠 Generate Quiz</button>
+
+                    <div id="quizResult"></div>
+                </div>
+
+                <div class="card notes-card">
+                    <span>📝</span>
+                    <h3>Notes Maker</h3>
+                    <p>Turn topics into notes</p>
+
+                    <input type="text" id="notesTopic" placeholder="Enter topic...">
+
+                    <select id="notesFormat">
+                        <option value="Bullet Points">• Bullet Points</option>
+                        <option value="Short Paragraphs">¶ Short Paragraphs</option>
+                        <option value="Headings + Points">🗂️ Headings + Points</option>
+                    </select>
+
+                    <button id="generateNotesBtn" type="button">📝 Make Notes</button>
+
+                    <div id="notesResult"></div>
+                </div>
+
+                <div class="card mistake-card">
+                    <span>❌</span>
+                    <h3>Mistake Analyzer</h3>
+                    <p>Find and fix your mistakes</p>
+
+                    <select id="mistakeSubject">
+                        <option value="">Select Subject</option>
+                        <option value="English">📖 English</option>
+                        <option value="Mathematics">🧮 Mathematics</option>
+                        <option value="Science">🔬 Science</option>
+                        <option value="Computer">💻 Computer</option>
+                        <option value="Sindhi">🟢 Sindhi</option>
+                        <option value="Urdu">📝 Urdu</option>
+                    </select>
+
+                    <textarea id="mistakeAnswer" rows="3" placeholder="Paste your answer here..."></textarea>
+                    <textarea id="mistakeCorrect" rows="2" placeholder="What was the correct answer/topic?"></textarea>
+
+                    <button id="analyzeMistakeBtn" type="button">🔍 Analyze Mistake</button>
+
+                    <div id="mistakeResult"></div>
+                </div>
+
+                <div class="card planner-card">
+                    <span>📅</span>
+                    <h3>Study Planner</h3>
+                    <p>Plan your study days</p>
+
+                    <input type="text" id="plannerSubjects" placeholder="Subjects (comma separated)">
+
+                    <input type="number" id="plannerDays" placeholder="Days available" min="1" max="60">
+
+                    <input type="number" id="plannerHours" placeholder="Hours per day" min="1" max="12">
+
+                    <button id="generatePlanBtn" type="button">📅 Build Plan</button>
+
+                    <div id="plannerResult"></div>
+                </div>
+
+                <div class="card translate-card">
+                    <span>🌐</span>
+                    <h3>Translate & Simplify</h3>
+                    <p>Understand any text easily</p>
+
+                    <textarea id="translateText" rows="3" placeholder="Paste text here..."></textarea>
+
+                    <select id="translateLang">
+                        <option value="Urdu">🇵🇰 Urdu</option>
+                        <option value="Sindhi">🟢 Sindhi</option>
+                        <option value="English">🇬🇧 English</option>
+                    </select>
+
+                    <select id="translateMode">
+                        <option value="Translate">🌐 Translate</option>
+                        <option value="Simplify">✨ Simplify</option>
+                    </select>
+
+                    <button id="translateBtn" type="button">🌐 Convert</button>
+
+                    <div id="translateResult"></div>
+                </div>
+
+                <div class="card scratch-card">
+                    <span>🐱</span>
+                    <h3>Scratch Tutor</h3>
+                    <p>Build Scratch projects</p>
+
+                    <textarea id="scratchQuestion" rows="3" placeholder="Ask about Scratch blocks, loops, sprites…"></textarea>
+
+                    <button id="scratchHelpBtn" type="button">🐱 Ask Scratch Tutor</button>
+
+                    <div id="scratchResult"></div>
+                </div>
+
+                <div class="card files-card">
+                    <span>📄</span>
+                    <h3>Files</h3>
+                    <p>Attach a file for later AI review</p>
+
+                    <input type="file" id="fileToolInput" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+
+                    <div id="fileToolChip" class="file-chip" style="display:none;">
+                        <span id="fileToolName"></span>
+                        <button type="button" id="fileToolClearBtn">✕ Remove</button>
+                    </div>
+
+                    <div id="fileToolResult"></div>
+                </div>
+
+            </section>
+
+            <!-- Teacher Tools -->
+
+            <section class="cards teacher-cards" id="teacherCardsSection" style="display:none;">
+
+                <div class="teacher-banner">
+                    <span>👨‍🏫</span>
+                    <div>
+                        <h3>Teacher Workspace</h3>
+                        <p>Tools built for lesson planning and grading — separate from the student toolkit.</p>
+                    </div>
+                </div>
+
+                <div class="card lessonplan-card">
+                    <span>🗂️</span>
+                    <h3>Lesson Plan Generator</h3>
+                    <p>Build a full lesson plan</p>
+
+                    <input type="text" id="lpSubject" placeholder="Subject">
+                    <input type="text" id="lpTopic" placeholder="Topic">
+
+                    <select id="lpClass">
+                        <option value="">Select Class</option>
+                        <option value="Nursery">Nursery</option>
+                        <option value="KG">KG</option>
+                        <option value="Grade 1">Grade 1</option>
+                        <option value="Grade 2">Grade 2</option>
+                        <option value="Grade 3">Grade 3</option>
+                        <option value="Grade 4">Grade 4</option>
+                        <option value="Grade 5">Grade 5</option>
+                        <option value="Grade 6">Grade 6</option>
+                        <option value="Grade 7">Grade 7</option>
+                        <option value="Grade 8">Grade 8</option>
+                        <option value="Grade 9">Grade 9</option>
+                        <option value="Grade 10">Grade 10</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                    </select>
+
+                    <input type="number" id="lpDuration" placeholder="Duration (minutes)" min="10" max="180">
+
+                    <button id="generateLessonPlanBtn" type="button">🗂️ Generate Plan</button>
+
+                    <div id="lessonPlanResult"></div>
+                </div>
+
+                <div class="card report-card-tool">
+                    <span>💬</span>
+                    <h3>Report Card Comments</h3>
+                    <p>Write comments in seconds</p>
+
+                    <input type="text" id="rcStudentName" placeholder="Student name (optional)">
+                    <input type="text" id="rcSubject" placeholder="Subject">
+
+                    <select id="rcPerformance">
+                        <option value="Excellent">🌟 Excellent</option>
+                        <option value="Good">🙂 Good</option>
+                        <option value="Average">😐 Average</option>
+                        <option value="Needs Improvement">⚠️ Needs Improvement</option>
+                    </select>
+
+                    <textarea id="rcStrengths" rows="2" placeholder="Strengths (optional)"></textarea>
+                    <textarea id="rcImprovements" rows="2" placeholder="Areas to improve (optional)"></textarea>
+
+                    <button id="generateCommentBtn" type="button">💬 Generate Comment</button>
+
+                    <div id="reportCommentResult"></div>
+                </div>
+
+            </section>
+
+
+            <!-- Chat Box -->
+
+           <div class="ai-chat">
+
+            <div id="chat-history"></div>
+    <div id="ai-response" class="ai-response"></div>
+
+    <h2>💬 Ask Zenvyra AI</h2>
+
+    <div class="ai-input-box">
+
+        <input
+            id="ai-question"
+            type="text"
+            placeholder="Ask Zenvyra anything..."
+        >
+
+        <button>📎</button>
+        <button id="searchVoiceBtn">🎤</button>
+       <button class="ai-send" onclick="sendAIQuestion()">➤</button>
+    </div>
+
+    <p id="voiceStatus" class="voice-status"></p>
+
+    <p>✨ Ask questions, solve problems, learn and create.</p>
+ 
+
+        </main>
+
+    </div>
+<div class="login-section">
+
+    <div class="login-card">
+
+        <div class="login-logo">✨</div>
+
+        <h1>Welcome to Zenvyra AI</h1>
+
+        <p>Create your account to get started.</p>
+
+        <input type="text" id="loginName" placeholder="👤 Your Name">
+
+        <input type="email" id="loginEmail" placeholder="📧 Email Address">
+
+        <input type="tel" id="loginPhone" placeholder="📱 Contact Number">
+
+        <input type="text" id="loginSchool" placeholder="🏫 School / Organization">
+
+        <input type="password" id="loginPassword" placeholder="🔐 Password" autocomplete="new-password">
+
+        <p class="login-proto-note">🔒 Prototype only — this password isn't saved or verified yet. Real authentication will be added later.</p>
+
+        <h3>Who are you?</h3>
+
+        <div class="role-buttons">
+    <button onclick="selectRole('Student')">🎓 Student</button>
+    <button onclick="selectRole('Teacher')">👨‍🏫 Teacher</button>
+    <button onclick="selectRole('General')">🌍 General</button>
+</div>
+
+<p id="selected-role">Please select your role</p>
+
+      <button class="create-account" onclick="openWelcome()">
+    Create Account ✨
+</button>
+
+<p id="welcome-message"></p>
+    </div>
+
+</div>
+<script src="script.js" defer></script>
+<div id="welcome-screen" class="welcome-screen">
+
+    <div class="welcome-card">
+
+        <div class="welcome-logo">✨</div>
+
+        <h1>Welcome to Zenvyra AI!</h1>
+
+        <p id="welcome-name">Hello! 👋</p>
+
+        <div class="role-badge" id="welcome-role">
+            🎓 Student Mode
+        </div>
+
+        <div class="founder-box">
+            <h3>👑 About Zenvyra</h3>
+            <p>
+                Created by <strong>Mairaj Ali</strong><br>
+                Founder & CEO of Zenvyra AI
+            </p>
+        </div>
+
+        <button onclick="openDashboard()" class="continue-button">
+            Continue to Zenvyra →
+        </button>
+
+    </div>
+
+</div>
+
+
+</div>
+
+
+
+<div id="settingsModal" class="upgrade-modal">
+    <div class="upgrade-modal-card settings-modal-card">
+
+        <button id="closeSettingsModal" class="close-modal-btn">✕</button>
+
+        <div class="upgrade-logo">⚙️</div>
+        <h1>Settings</h1>
+        <p>Your profile and how Zenvyra looks.</p>
+
+        <div class="settings-section">
+            <h3>👤 Display name</h3>
+            <input type="text" id="settingsName" placeholder="Your name">
+        </div>
+
+        <div class="settings-section">
+            <h3>🎨 Accent color</h3>
+            <div class="theme-swatches">
+                <button type="button" class="theme-swatch" data-accent="#78dfbc" data-accent-dark="#5ed5ae" data-accent-light="#baf3df" data-accent-pale="#d4f5e9" style="background:#78dfbc;">Mint</button>
+                <button type="button" class="theme-swatch" data-accent="#5aa9ff" data-accent-dark="#3d8bef" data-accent-light="#bfe0ff" data-accent-pale="#e3f1ff" style="background:#5aa9ff;">Ocean</button>
+                <button type="button" class="theme-swatch" data-accent="#ffb648" data-accent-dark="#f59a1f" data-accent-light="#ffe1b0" data-accent-pale="#fff3e0" style="background:#ffb648;">Sunset</button>
+                <button type="button" class="theme-swatch" data-accent="#ff8fb0" data-accent-dark="#f16590" data-accent-light="#ffd2e0" data-accent-pale="#ffeef3" style="background:#ff8fb0;">Berry</button>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3>🗂️ Chat history</h3>
+            <button type="button" id="clearHistoryBtn" class="settings-danger-btn">Clear all saved chats</button>
+        </div>
+
+        <button id="saveSettingsBtn" class="create-account" style="margin-top: 10px;">Save settings ✨</button>
+        <p id="settingsSavedMsg" class="upgrade-note" style="display:none;">✅ Saved!</p>
+
+        <div class="settings-section settings-logout-section">
+            <button type="button" id="logoutBtn" class="settings-logout-btn">🚪 Log out</button>
+        </div>
+
+    </div>
+</div>
+
+<div id="aboutModal" class="upgrade-modal">
+    <div class="upgrade-modal-card">
+
+        <button id="closeAboutModal" class="close-modal-btn">✕</button>
+
+        <div class="upgrade-logo">✨</div>
+        <h1>About Zenvyra AI</h1>
+        <p>Your all-in-one AI study & teaching companion — built to make learning feel effortless.</p>
+
+        <div class="founder-box">
+            <h3>👑 Founder</h3>
+            <p>
+                Created by <strong>Mairaj Ali</strong><br>
+                Founder &amp; CEO of Zenvyra AI
+            </p>
+        </div>
+
+        <p class="upgrade-note">Every tool in Zenvyra — Ask AI, Photo Solver, Quiz Generator, Lesson Explainer and more — is free to use.</p>
+
+    </div>
+</div>
+
+</body>
+</html>
