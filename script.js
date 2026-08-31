@@ -19,7 +19,7 @@ function wait(ms) {
 
 async function askZenvyraAI(system, userMessage) {
     try {
-        const res = await fetch("http://localhost:3000/api/chat", {
+        const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -52,7 +52,7 @@ async function askZenvyraAI(system, userMessage) {
 // so the UI still has something to show instead of breaking.
 async function askZenvyraAIJson(system, userMessage, demoBuilder) {
     try {
-        const res = await fetch("http://localhost:3000/api/chat-json", {
+        fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
