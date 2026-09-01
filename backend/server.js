@@ -9,7 +9,13 @@ const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: "http://127.0.0.1:5500",
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"]
+}));
+app.options("*", cors());
+
 app.use(express.json({ limit: "15mb" }));
 
 if (!process.env.GEMINI_API_KEY) {
