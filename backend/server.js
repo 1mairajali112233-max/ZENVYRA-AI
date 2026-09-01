@@ -10,11 +10,14 @@ const { GoogleGenAI } = require("@google/genai");
 const app = express();
 
 app.use(cors({
-    origin: "http://127.0.0.1:5500",
+    origin: true,
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"]
+    allowedHeaders: ["Content-Type"],
+    optionsSuccessStatus: 204
 }));
+
 app.options("*", cors());
+
 
 app.use(express.json({ limit: "15mb" }));
 
