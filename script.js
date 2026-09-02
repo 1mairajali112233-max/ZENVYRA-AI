@@ -19,6 +19,33 @@ function wait(ms) {
 
 async function askZenvyraAI(system, userMessage) {
     try {
+        const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: `${system}\n\nUser: ${userMessage}`
+            })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            if (data.limitReached) {
+                return "🚫 You have reached your Zenvyra AI message limit. Please try again later.";
+            }
+            throw new Error(data.message || "AI request failed.");
+        }
+
+        return data.reply;
+
+    } catch (error) {
+        console.error("Zenvyra AI Error:", error);
+        return "⚠️ Sorry, I couldn't connect to Zenvyra AI right now.";
+    }
+}
+    try {
         const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
             method: "POST",
             headers: {
