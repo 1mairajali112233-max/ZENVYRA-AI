@@ -11,14 +11,14 @@ const app = express();
 app.get("/", (req, res) => {
     res.send("Zenvyra AI backend is working!");
 });
-app.use(cors({
-    origin: true,
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-    optionsSuccessStatus: 204
-}));
+app.use(cors());
 
-app.options("*", cors());
+app.use((req, res, next) => {
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+    next();
+});
 
 
 app.use(express.json({ limit: "15mb" }));
