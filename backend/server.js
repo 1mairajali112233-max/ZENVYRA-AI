@@ -8,7 +8,9 @@ const cors = require("cors");
 const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
-
+app.get("/", (req, res) => {
+    res.send("Zenvyra AI backend is working!");
+});
 app.use(cors({
     origin: true,
     methods: ["GET", "POST", "OPTIONS"],
