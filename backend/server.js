@@ -205,13 +205,58 @@ app.post("/api/vision", async (req, res) => {
         console.error("Gemini /api/vision error:", err);
 
         res.status(500).json({
-            success: false,
-            message: "AI request failed."
-        });
+    success: false,
+    message: err.message || "AI request failed."
+});
     }
 });
 
+// File (PDF) analysis
+app.post("/api/file", async (req, res) => {
+    try {
+        const { base64Data, mediaType, prompt } = req.body;
 
+        if (!base64Data) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing file data."
+            });
+        }
+
+        const response = await ai.models.generateContent({
+            model: MODEL,
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        {
+                            text: prompt || "Read this file and explain its contents clearly."
+                        },
+                        {
+                            inlineData: {
+                                mimeType: mediaType || "application/pdf",
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        res.json({
+            success: true,
+            reply: response.text
+        });
+
+    } catch (err) {
+        console.error("Gemini /api/file error:", err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message || "File analysis failed."
+        });
+    }
+});
 const PORT = process.env.PORT || 3000;
  
 app.listen(PORT, "0.0.0.0", () => {

@@ -44,35 +44,8 @@ async function askZenvyraAI(system, userMessage) {
         console.error("Zenvyra AI Error:", error);
         return "⚠️ Sorry, I couldn't connect to Zenvyra AI right now.";
     }
-}
-    try {
-        const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: `${system}\n\nUser: ${userMessage}`
-            })
-        });
+ }
 
-        const data = await res.json();
-
-        if (!data.success) {
-    if (data.limitReached) {
-        return "🚫 You have reached your Zenvyra AI message limit. Please try again later.";
-    }
-
-    throw new Error(data.message || "AI request failed.");
-}
-
-        return data.reply;
-
-    } catch (error) {
-        console.error("Zenvyra AI Error:", error);
-        return "⚠️ Sorry, I couldn't connect to Zenvyra AI right now.";
-    }
-}
 
 // Calls the backend for a JSON-shaped AI response (e.g. quiz generation).
 // `demoBuilder`, if provided, is only used as a fallback if the real call fails,
@@ -147,7 +120,7 @@ function loadingHTML(label) {
 // Calls the backend for a vision (image) AI response.
 async function askZenvyraAIVision(base64Data, mediaType, prompt) {
     try {
-        const res = await fetch("http://localhost:3000/api/vision", {
+        const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/vision", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -1505,7 +1478,7 @@ function resetFileTool() {
 }
 
 if (fileToolInput) {
-    fileToolInput.addEventListener("change", () => {
+    fileToolInput.addEventListener("change", async () => {
         const file = fileToolInput.files[0];
         if (!file) return;
 
@@ -1528,10 +1501,62 @@ if (fileToolInput) {
             return;
         }
 
-        if (fileToolName) fileToolName.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        if (fileToolName) {
+            fileToolName.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        }
+
         if (fileToolChip) fileToolChip.style.display = "flex";
-        if (fileToolResult) {
-            fileToolResult.innerHTML = `<p>✅ File ready. 🔧 AI-based file analysis is not connected yet — this only confirms the file was selected and validated correctly.</p>`;
+
+        if (file.type === "application/pdf" || file.type === "text/plain") {
+            if (fileToolResult) {
+                fileToolResult.innerHTML = `<p>⏳ Zenvyra is analyzing "${file.name}"...</p>`;
+            }
+
+            try {
+                const base64Data = await fileToBase64(file);
+
+                const res = await fetch(
+                    "https://zenvyra-ai-production.up.railway.app/api/file",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            base64Data,
+                            mediaType: file.type,
+                            prompt: "Read this file carefully and explain its contents clearly. If it contains questions, solve them. Give a helpful answer for a student."
+                        })
+                    }
+                );
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || "File analysis failed.");
+                }
+
+                if (fileToolResult) {
+                    fileToolResult.innerHTML =
+                        `<p><strong>📄 ${file.name}</strong></p>` +
+                        `<p><strong>✨ Zenvyra:</strong></p>` +
+                        `<div>${renderLiteMarkdown(data.reply)}</div>`;
+                }
+
+            } catch (error) {
+                console.error("File AI Error:", error);
+
+                if (fileToolResult) {
+                    fileToolResult.innerHTML =
+                        `<p>⚠️ Zenvyra couldn't analyze this file right now.</p>`;
+                }
+            }
+
+        } else {
+            if (fileToolResult) {
+                fileToolResult.innerHTML =
+                    `<p>✅ File "${file.name}" is ready.</p>`;
+            }
         }
     });
 }
@@ -1548,3 +1573,72 @@ restoreSessionOnLoad();
 
 loadSavedTheme();
 applyStoredName();
+
+const chatAttachmentBtn = document.getElementById("chatAttachmentBtn");
+const chatAttachmentInput = document.getElementById("chatAttachmentInput");
+
+if (chatAttachmentBtn && chatAttachmentInput) {
+    chatAttachmentBtn.addEventListener("click", () => {
+        chatAttachmentInput.click();
+    });
+
+    chatAttachmentInput.addEventListener("change", async () => {
+        const file = chatAttachmentInput.files[0];
+
+        if (!file) return;
+
+        console.log("📎 File selected:", file.name);
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "application/pdf",
+            "text/plain"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert("⚠️ This file type is not supported.");
+            chatAttachmentInput.value = "";
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            alert("⚠️ File is too large. Maximum size is 10 MB.");
+            chatAttachmentInput.value = "";
+            return;
+        }
+
+        if (file.type.startsWith("image/")) {
+            try {
+                const base64Data = await fileToBase64(file);
+
+                const answer = await askZenvyraAIVision(
+                    base64Data,
+                    file.type,
+                    "Analyze this attached image and explain what it contains or solve the question shown in it. Give a clear and helpful answer."
+                );
+
+                const response = document.getElementById("ai-response");
+
+                if (response) {
+                    response.innerHTML =
+                        "<strong>📎 " + file.name + "</strong><br><br>" +
+                        "<strong>✨ Zenvyra:</strong><br>" +
+                        renderLiteMarkdown(answer);
+
+                    response.classList.add("show");
+                }
+
+            } catch (error) {
+                console.error("Attachment AI Error:", error);
+                alert("⚠️ Zenvyra couldn't analyze this file.");
+            }
+
+        } else {
+            alert("📎 File selected. AI analysis for PDF/TXT attachments will be added next.");
+        }
+
+        chatAttachmentInput.value = "";
+    });
+}
