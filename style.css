@@ -934,7 +934,7 @@ input {
 
 .settings-section input[type="text"] {
     width: 100%;
-    padding: 12px;
+    padding: 20px;
     border: 1px solid #d7eee7;
     border-radius: 12px;
     outline: none;
@@ -1257,4 +1257,477 @@ input {
     padding: 4px 8px;
     display: inline-block;
     margin: 4px 0 8px;
+}
+.logo img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+.dashboard-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+.dashboard-logo {
+    width: 33px;
+    height: 32px;
+    object-fit: contain;
+}
+.welcome-icon img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+}
+ .lesson-explainer-card img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+p img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    vertical-align: middle;
+}
+.login-logo img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+/* Create Account wala logo */
+img[alt="Zenvyra"] {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+/* Welcome wala logo */
+.welcome-logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+.small-logo {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+}
+
+.founder-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+/* ===== Settings & About Zenvyra - Resize ===== */
+
+.upgrade-modal-card {
+    max-width: 430px;
+    width: 92%;
+    padding: 28px;
+    border-radius: 20px;
+}
+
+/* Settings */
+.settings-modal-card {
+    max-width: 430px;
+    width: 92%;
+}
+
+/* Settings input */
+.settings-section input[type="text"] {
+    padding: 12px 14px;
+}
+
+/* About logo */
+.upgrade-logo img {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+}
+
+/* About title */
+.upgrade-modal-card h1 {
+    font-size: 22px;
+}
+
+/* Mobile */
+@media (max-width: 500px) {
+    .upgrade-modal-card {
+        width: 94%;
+        padding: 22px 18px;
+        border-radius: 18px;
+    }
+
+    .upgrade-logo img {
+        width: 48px;
+        height: 48px;
+    }
+}
+/* =========================
+   SETTINGS LOGO SIZE
+   ========================= */
+
+.settings-logo img {
+    width: 45px !important;
+    height: 45px !important;
+    object-fit: contain !important;
+    display: block;
+}
+
+.settings-logo {
+    width: 45px !important;
+    height: 45px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+/* Settings Save Button Logo */
+.settings-button-logo {
+    width: 22px !important;
+    height: 22px !important;
+    object-fit: contain !important;
+    vertical-align: middle;
+    margin-left: 6px;
+}
+/* Welcome Screen Logo */
+#welcome-screen .welcome-logo img,
+.welcome-logo img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+/* LOGIN KE BAAD WELCOME SCREEN CARD */
+#welcome-screen .welcome-card {
+    width: 360px;
+    max-width: 85%;
+    padding: 22px 20px;
+    border-radius: 18px;
+}
+
+/* Welcome logo */
+#welcome-screen .welcome-logo img {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+}
+
+/* Welcome heading */
+#welcome-screen .welcome-card h1 {
+    font-size: 23px;
+    margin: 12px 0;
+}
+/* ===== WELCOME SCREEN SIZE FIX ===== */
+
+#welcome-screen .welcome-card {
+    width: 360px !important;
+    max-width: 90% !important;
+    padding: 28px 24px !important;
+    border-radius: 24px !important;
+    transform: none !important;
+}
+
+#welcome-screen .welcome-logo {
+    width: 70px !important;
+    height: 70px !important;
+}
+
+#welcome-screen .welcome-logo img {
+    width: 55px !important;
+    height: 55px !important;
+}
+
+#welcome-screen .welcome-card h1 {
+    font-size: 24px !important;
+}
+
+#welcome-screen .continue-button {
+    padding: 14px !important;
+    font-size: 15px !important;
+}
+/* ===== LOGIN AFTER WELCOME CARD ===== */
+
+#welcome-screen .welcome-card {
+    width: 360px !important;
+    max-width: 90vw !important;
+    padding: 25px !important;
+    border-radius: 22px !important;
+    transform: none !important;
+}
+
+#welcome-screen .welcome-card .welcome-logo {
+    width: 70px !important;
+    height: 70px !important;
+    margin: 0 auto 12px !important;
+}
+
+#welcome-screen .welcome-card .welcome-logo img {
+    width: 55px !important;
+    height: 55px !important;
+    object-fit: contain !important;
+}
+
+#welcome-screen .welcome-card h1 {
+    font-size: 23px !important;
+    margin: 8px 0 !important;
+}
+
+#welcome-screen .welcome-card #welcome-name {
+    font-size: 15px !important;
+    margin-bottom: 12px !important;
+}
+
+#welcome-screen .welcome-card .role-badge {
+    font-size: 12px !important;
+    padding: 7px 15px !important;
+    margin-bottom: 14px !important;
+}
+
+#welcome-screen .welcome-card .continue-button {
+    padding: 13px !important;
+    font-size: 15px !important;
+}
+/* FINAL WELCOME CARD */
+
+#welcome-screen .welcome-card {
+    width: 360px !important;
+    max-width: 90vw !important;
+    padding: 25px !important;
+    transform: none !important;
+}
+
+#welcome-screen .welcome-logo {
+    width: 70px !important;
+    height: 70px !important;
+}
+
+#welcome-screen .welcome-logo img {
+    width: 55px !important;
+    height: 55px !important;
+}
+
+#welcome-screen .welcome-card h1 {
+    font-size: 23px !important;
+}
+
+#welcome-screen .founder-box {
+    padding: 14px !important;
+}
+
+#welcome-screen .founder-box h3 {
+    font-size: 14px !important;
+}
+
+#welcome-screen .founder-box img {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+#welcome-screen .continue-button {
+    padding: 13px !important;
+}
+/* FINAL FIX - WELCOME CONTINUE BUTTON */
+#welcome-screen .welcome-card .continue-button {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 9999 !important;
+    width: 100% !important;
+    min-height: 45px !important;
+    padding: 12px 16px !important;
+    margin-top: 16px !important;
+    font-size: 15px !important;
+    cursor: pointer !important;
+}
+/* ===== PROFILE PICTURE ===== */
+
+#profileBadge {
+    overflow: hidden;
+    padding: 0;
+}
+
+#profileBadge img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+/* ===== SETTINGS ICON SIZE ===== */
+
+.settings-modal-card .upgrade-logo {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    font-size: 28px;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+}
+
+.settings-modal-card .upgrade-logo img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+/* ===== SETTINGS MODAL ===== */
+
+#settingsModal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+}
+
+#settingsModal .settings-modal-card {
+    position: relative !important;
+    width: 500px !important;
+    max-width: 90% !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    margin: auto !important;
+    box-sizing: border-box !important;
+}
+
+#closeSettingsModal {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    z-index: 100000 !important;
+    cursor: pointer !important;
+}
+
+#settingsModal .settings-profile-picture {
+    width: 70px !important;
+    height: 70px !important;
+    margin: 0 auto 12px !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+}
+
+#settingsModal .settings-profile-picture img {
+    width: 70px !important;
+    height: 70px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    display: block !important;
+}
+/* ===== FINAL SETTINGS FIX ===== */
+
+#settingsModal {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(10, 40, 35, 0.55) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 999999 !important;
+    padding: 20px !important;
+}
+
+#settingsModal.show {
+    display: flex !important;
+}
+
+#settingsModal .settings-modal-card {
+    position: relative !important;
+    width: 430px !important;
+    max-width: 92vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+    margin: auto !important;
+    padding: 28px !important;
+    border-radius: 20px !important;
+    box-sizing: border-box !important;
+}
+
+#settingsModal #closeSettingsModal {
+    position: absolute !important;
+    top: 14px !important;
+    right: 14px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: #f0f5f3 !important;
+    cursor: pointer !important;
+    z-index: 1000000 !important;
+}
+
+#settingsModal .settings-section button {
+    position: relative !important;
+    z-index: 1000001 !important;
+    pointer-events: auto !important;
+}
+/* ===== FINAL SETTINGS MODAL ===== */
+
+#settingsModal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 40, 35, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+#settingsModal.show {
+    display: flex !important;
+}
+
+#settingsModal .settings-modal-card {
+    position: relative;
+    width: 430px;
+    max-width: 92vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: auto;
+    box-sizing: border-box;
+}
+
+#closeSettingsModal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 100000;
+    cursor: pointer;
+}
+
+#settingsModal .settings-profile-picture {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+#settingsModal .settings-profile-picture img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
 }

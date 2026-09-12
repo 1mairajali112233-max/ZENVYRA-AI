@@ -20,7 +20,7 @@
 
             <div class="sidebar-top-row">
                 <div class="logo">
-                    ✨ Zenvyra
+                     <img src="logo.png" alt="Zenvyra">
                 </div>
                 <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">✕</button>
             </div>
@@ -75,14 +75,14 @@
 
                 <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">☰</button>
 
-                <div>
-                    <h2>✨ Zenvyra AI</h2>
-                    <p id="topbarGreeting">Learn • Create • Discover</p>
-                </div>
+<div>
+    <h2><img src="logo.png" class="dashboard-logo" alt="Zenvyra AI"></h2>
+    <p id="topbarGreeting">Learn • Create • Discover</p>
+</div>
 
-                <div class="profile" id="profileBadge" title="Settings">
-                    👤
-                </div>
+                <div class="profile" id="profileBadge" title="Profile">
+    <img id="profilePicture" src="logo.png" alt="Profile">
+</div>
 
             </header>
 
@@ -90,7 +90,7 @@
             <section class="welcome">
 
                 <div class="welcome-icon">
-                    ✨
+                   <img src="logo.png">
                 </div>
 
                 <h1>Hello! 👋</h1>
@@ -124,8 +124,11 @@
                 <div class="card">
                     <span>📸</span>
                     <h3>Photo Solver</h3>
-                    <input type="file" id="photoInput" accept="image/*">
-                    <button id="solvePhotoBtn" type="button">🔍 Solve Photo</button>
+                   <input type="file" id="photoInput" accept="image/*">
+
+<textarea id="photoQuestion" rows="3" placeholder="Write your question about this photo..."></textarea>
+
+<button id="solvePhotoBtn" type="button">🔍 Solve Photo</button>
                     <div id="photoSolution" class="photo-solution"></div>
                     <p>Upload a question</p>
                 </div>
@@ -179,7 +182,7 @@
     </select>
 
     <button id="explainLessonBtn" type="button">
-        ✨ Explain Lesson
+        <img src="logo.png"> Explain Lesson
     </button>
 
     <div id="lessonResult"></div>
@@ -282,7 +285,7 @@
 
                     <select id="translateMode">
                         <option value="Translate">🌐 Translate</option>
-                        <option value="Simplify">✨ Simplify</option>
+                        <option value="Simplify"><img src="logo.png"> Simplify</option>
                     </select>
 
                     <button id="translateBtn" type="button">🌐 Convert</button>
@@ -415,7 +418,7 @@
 
     <p id="voiceStatus" class="voice-status"></p>
 
-    <p>✨ Ask questions, solve problems, learn and create.</p>
+    <p><img src="logo.png"> Ask questions, solve problems, learn and create.</p>
  
 
         </main>
@@ -425,7 +428,7 @@
 
     <div class="login-card">
 
-        <div class="login-logo">✨</div>
+        <div class="login-logo"><img src="logo.png" alt="Zenvyra"></div>
 
         <h1>Welcome to Zenvyra AI</h1>
 
@@ -441,8 +444,6 @@
 
         <input type="password" id="loginPassword" placeholder="🔐 Password" autocomplete="new-password">
 
-        <p class="login-proto-note">🔒 Prototype only — this password isn't saved or verified yet. Real authentication will be added later.</p>
-
         <h3>Who are you?</h3>
 
         <div class="role-buttons">
@@ -454,7 +455,7 @@
 <p id="selected-role">Please select your role</p>
 
       <button class="create-account" onclick="openWelcome()">
-    Create Account ✨
+    Create Account <img src="logo.png" alt="Zenvyra">
 </button>
 
 <p id="welcome-message"></p>
@@ -462,11 +463,14 @@
 
 </div>
 <script src="script.js" defer></script>
-<div id="welcome-screen" class="welcome-screen">
+
+        <div id="welcome-screen" class="welcome-screen">
 
     <div class="welcome-card">
 
-        <div class="welcome-logo">✨</div>
+        <div class="welcome-logo">
+            <img src="logo.png" alt="Zenvyra">
+        </div>
 
         <h1>Welcome to Zenvyra AI!</h1>
 
@@ -477,7 +481,11 @@
         </div>
 
         <div class="founder-box">
-            <h3>👑 About Zenvyra</h3>
+            <h3>
+                <img src="logo.png" alt="Zenvyra">
+                About Zenvyra
+            </h3>
+
             <p>
                 Created by <strong>Mairaj Ali</strong><br>
                 Founder & CEO of Zenvyra AI
@@ -492,19 +500,28 @@
 
 </div>
 
-
-</div>
-
-
-
 <div id="settingsModal" class="upgrade-modal">
     <div class="upgrade-modal-card settings-modal-card">
-
         <button id="closeSettingsModal" class="close-modal-btn">✕</button>
 
-        <div class="upgrade-logo">⚙️</div>
         <h1>Settings</h1>
+
         <p>Your profile and how Zenvyra looks.</p>
+        <div class="settings-section">
+    <h3>🖼️ Profile Picture</h3>
+
+    <div class="settings-profile-picture">
+        <img id="settingsProfilePicture" src="logo.png" alt="Profile Picture">
+    </div>
+
+    <button type="button" id="changeProfilePictureBtn" class="create-account">
+        🖼️ Change Profile Picture
+    </button>
+
+    <button type="button" id="removeProfilePictureBtn" class="settings-danger-btn">
+        🗑️ Remove Picture
+    </button>
+</div>
 
         <div class="settings-section">
             <h3>👤 Display name</h3>
@@ -526,7 +543,9 @@
             <button type="button" id="clearHistoryBtn" class="settings-danger-btn">Clear all saved chats</button>
         </div>
 
-        <button id="saveSettingsBtn" class="create-account" style="margin-top: 10px;">Save settings ✨</button>
+        <button id="saveSettingsBtn" class="create-account" style="margin-top: 10px;">
+    Save settings <img src="logo.png" class="settings-button-logo">
+</button>
         <p id="settingsSavedMsg" class="upgrade-note" style="display:none;">✅ Saved!</p>
 
         <div class="settings-section settings-logout-section">
@@ -541,22 +560,29 @@
 
         <button id="closeAboutModal" class="close-modal-btn">✕</button>
 
-        <div class="upgrade-logo">✨</div>
+        <div class="upgrade-logo"><img src="logo.png"></div>
         <h1>About Zenvyra AI</h1>
         <p>Your all-in-one AI study & teaching companion — built to make learning feel effortless.</p>
 
-        <div class="founder-box">
-            <h3>👑 Founder</h3>
-            <p>
-                Created by <strong>Mairaj Ali</strong><br>
-                Founder &amp; CEO of Zenvyra AI
-            </p>
-        </div>
+        <img src="logo.png" alt="Zenvyra">
+        <h3><img src="logo.png" alt="Zenvyra"> Founder</h3>
+
+        <p>
+            Created by <strong>Mairaj Ali</strong><br>
+            Founder & CEO of Zenvyra AI
+        </p>
 
         <p class="upgrade-note">Every tool in Zenvyra — Ask AI, Photo Solver, Quiz Generator, Lesson Explainer and more — is free to use.</p>
 
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- Profile Picture Upload -->
+<input
+    type="file"
+    id="profilePictureInput"
+    accept="image/*"
+    style="display:none;">
 </body>
 </html>

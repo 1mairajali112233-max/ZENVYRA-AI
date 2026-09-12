@@ -1,3 +1,16 @@
+
+const SUPABASE_URL = "https://djijtacuygdhqgxlpbif.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_Q9oFojJYkkUMnHIykKxCjQ_IeFAGXew";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+const studentToolsBtn = document.getElementById("studentToolsBtn");
+const teacherToolsBtn = document.getElementById("teacherToolsBtn");
+const studentCardsSection = document.querySelector(".cards:not(.teacher-cards)");
+const teacherCardsSection = document.getElementById("teacherCardsSection");
 /* ===============================
    🤖 AI PLACEHOLDER LAYER — NO AI API CONNECTED YET
    -------------------------------------------------
@@ -45,14 +58,16 @@ async function askZenvyraAI(system, userMessage) {
         return "⚠️ Sorry, I couldn't connect to Zenvyra AI right now.";
     }
  }
-
+ 
 
 // Calls the backend for a JSON-shaped AI response (e.g. quiz generation).
 // `demoBuilder`, if provided, is only used as a fallback if the real call fails,
 // so the UI still has something to show instead of breaking.
 async function askZenvyraAIJson(system, userMessage, demoBuilder) {
+    const profile = getUserProfile();
+const userId = profile?.email || profile?.name || "unknown-user";
     try {
-        fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
+       const res = await  fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -203,17 +218,21 @@ function roleLabel(role) {
         : "🌍 General Mode";
 }
 
-function openWelcome() {
+async function openWelcome() {
     const nameInput = document.getElementById("loginName");
     const emailInput = document.getElementById("loginEmail");
     const phoneInput = document.getElementById("loginPhone");
     const schoolInput = document.getElementById("loginSchool");
+    const passwordInput = document.getElementById("loginPassword");
 
     const name = nameInput ? nameInput.value.trim() : "";
     const email = emailInput ? emailInput.value.trim() : "";
+    const phone = phoneInput ? phoneInput.value.trim() : "";
+    const school = schoolInput ? schoolInput.value.trim() : "";
+    const password = passwordInput ? passwordInput.value : "";
 
     if (!name) {
-        alert("Please enter your name first!");
+        alert("Please enter your name!");
         return;
     }
 
@@ -222,24 +241,61 @@ function openWelcome() {
         return;
     }
 
-    if (!selectedRole) {
-        alert("Please select who you are (Student / Teacher / General)!");
+    if (!password || password.length < 6) {
+        alert("Password must be at least 6 characters!");
         return;
     }
 
-    const profile = {
-        name: name,
-        email: email,
-        phone: phoneInput ? phoneInput.value.trim() : "",
-        school: schoolInput ? schoolInput.value.trim() : "",
-        role: selectedRole
-    };
+    if (!selectedRole) {
+        alert("Please select Student, Teacher, or General!");
+        return;
+    }
 
-    saveUserProfile(profile);
-    localStorage.setItem(LOGGED_IN_KEY, "true");
-    localStorage.setItem(WELCOME_SEEN_KEY, "false");
+    try {
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    name: name,
+                    phone: phone,
+                    school: school,
+                    role: selectedRole
+                }
+            }
+        });
+if (error) {
+    console.error("Signup error:", error);
+    alert("Signup failed: " + error.message);
+    return;
+}
 
-    showWelcomeScreen(profile);
+console.log("Signup successful:", data);
+        if (error) {
+            console.error("Signup error:", error);
+            alert(error.message);
+            return;
+        }
+
+        const profile = {
+            name: name,
+            email: email,
+            phone: phone,
+            school: school,
+            role: selectedRole
+        };
+
+        saveUserProfile(profile);
+
+        localStorage.setItem(LOGGED_IN_KEY, "true");
+        localStorage.setItem(WELCOME_SEEN_KEY, "false");
+
+        showWelcomeScreen(profile);
+
+    } catch (error) {
+        console.error("Signup failed:", error);
+        alert("Something went wrong. Please try again.");
+    }
 }
 
 function showWelcomeScreen(profile) {
@@ -284,7 +340,50 @@ function showDashboard() {
 
 // Restores the correct screen (login / welcome / dashboard) on page load or refresh,
 // based on what was actually saved — never guessed from stale DOM state.
-function restoreSessionOnLoad() {
+async function restoreSessionOnLoad() {
+    try {
+        const { data: { session }, error } =
+            await supabaseClient.auth.getSession();
+
+        if (error) {
+            console.error("Session restore error:", error);
+            showLoginScreen();
+            return;
+        }
+
+        if (session && session.user) {
+            const user = session.user;
+            const metadata = user.user_metadata || {};
+
+            const profile = {
+                name: metadata.name || user.email?.split("@")[0] || "User",
+                email: user.email || "",
+                phone: metadata.phone || "",
+                school: metadata.school || "",
+                role: metadata.role || "General"
+            };
+
+            saveUserProfile(profile);
+            localStorage.setItem(LOGGED_IN_KEY, "true");
+
+            const welcomeSeen =
+                localStorage.getItem(WELCOME_SEEN_KEY) === "true";
+
+            if (welcomeSeen) {
+                showDashboard();
+            } else {
+                showWelcomeScreen(profile);
+            }
+
+        } else {
+            showLoginScreen();
+        }
+
+    } catch (error) {
+        console.error("Session restore failed:", error);
+        showLoginScreen();
+    }
+}
     const loggedIn = localStorage.getItem(LOGGED_IN_KEY) === "true";
     const welcomeSeen = localStorage.getItem(WELCOME_SEEN_KEY) === "true";
     const profile = getUserProfile();
@@ -304,39 +403,30 @@ function restoreSessionOnLoad() {
     } else {
         if (login) login.style.display = "flex";
     }
-}
 
 async function sendAIQuestion() {
     const input = document.getElementById("ai-question");
     const response = document.getElementById("ai-response");
 
-    if (!input || !response) {
-        console.error("AI elements not found.");
-        return;
-    }
+    if (!input) return;
 
     const question = input.value.trim();
 
-    if (question === "") {
-        response.textContent = "Please type a question first! 😊";
-        response.classList.add("show");
+    if (!question) {
         return;
     }
-
-    input.value = "";
-    response.innerHTML = "<strong>👤 You:</strong> " + question + "<br><br><strong>✨ Zenvyra:</strong> ✨ Thinking…";
-    response.classList.add("show");
-
-    const answer = await askZenvyraAI(
-        "You are Zenvyra AI, a friendly and encouraging study assistant. Keep answers clear, helpful, and appropriately concise.",
-        question
-    );
 
     if (!activeSession) {
         startSessionInMemory();
     }
 
-    activeSession.messages.push({ question, answer });
+    // Show user's question immediately
+    const userMessage = {
+        question: question,
+        answer: "Thinking..."
+    };
+
+    activeSession.messages.push(userMessage);
 
     if (activeSession.messages.length === 1) {
         activeSession.title = makeTitleFromQuestion(question);
@@ -345,6 +435,35 @@ async function sendAIQuestion() {
     renderMessagesInMain(activeSession.messages);
     saveActiveSession();
     renderLeftSidebarHistory();
+
+    input.value = "";
+
+    try {
+        const answer = await askZenvyraAI(question);
+
+        userMessage.answer = answer || "Sorry, I couldn't generate a response.";
+
+        if (response) {
+            response.textContent = userMessage.answer;
+        }
+
+        renderMessagesInMain(activeSession.messages);
+        saveActiveSession();
+        renderLeftSidebarHistory();
+
+    } catch (error) {
+        console.error("AI question error:", error);
+
+        userMessage.answer =
+            "Sorry, something went wrong. Please try again.";
+
+        if (response) {
+            response.textContent = userMessage.answer;
+        }
+
+        renderMessagesInMain(activeSession.messages);
+        saveActiveSession();
+    }
 }
 
 /* ---------- Session-based Chat History (left sidebar, localStorage) ---------- */
@@ -664,7 +783,13 @@ if (solvePhotoBtn) {
 
         try {
             const base64 = await fileToBase64(file);
-            const answer = await askZenvyraAIVision(base64, file.type || "image/jpeg", "Solve the question in this photo, step by step.");
+            const question = document.getElementById("photoQuestion")?.value.trim();
+
+const answer = await askZenvyraAIVision(
+    base64,
+    file.type || "image/jpeg",
+    question || "Solve the question in this photo, step by step."
+);
             solution.innerHTML = `<strong>🔍 Zenvyra Photo Solver</strong>${renderLiteMarkdown(answer)}`;
         } catch (e) {
             solution.innerHTML = "⚠️ Couldn't read that photo. Please try again.";
@@ -1164,26 +1289,29 @@ if (scratchHelpBtn) {
 // ===============================
 // 🎓 / 👨‍🏫 STUDENT vs TEACHER TOOLS TOGGLE
 // ===============================
-
-const studentToolsBtn = document.getElementById("studentToolsBtn");
-const teacherToolsBtn = document.getElementById("teacherToolsBtn");
-const studentCardsSection = document.querySelector(".cards:not(.teacher-cards)");
-const teacherCardsSection = document.getElementById("teacherCardsSection");
-
 function showStudentTools() {
+
     if (studentCardsSection) studentCardsSection.style.display = "grid";
+
     if (teacherCardsSection) teacherCardsSection.style.display = "none";
+
     if (studentToolsBtn) studentToolsBtn.classList.add("active");
+
     if (teacherToolsBtn) teacherToolsBtn.classList.remove("active");
+
 }
 
 function showTeacherTools() {
-    if (studentCardsSection) studentCardsSection.style.display = "none";
-    if (teacherCardsSection) teacherCardsSection.style.display = "grid";
-    if (teacherToolsBtn) teacherToolsBtn.classList.add("active");
-    if (studentToolsBtn) studentToolsBtn.classList.remove("active");
-}
 
+    if (studentCardsSection) studentCardsSection.style.display = "none";
+
+    if (teacherCardsSection) teacherCardsSection.style.display = "grid";
+
+    if (teacherToolsBtn) teacherToolsBtn.classList.add("active");
+
+    if (studentToolsBtn) studentToolsBtn.classList.remove("active");
+    
+}
 if (studentToolsBtn) {
     studentToolsBtn.addEventListener("click", showStudentTools);
 }
@@ -1273,47 +1401,63 @@ const settingsBtn = document.getElementById("settingsBtn");
 if (settingsBtn) {
     settingsBtn.addEventListener("click", openSettingsModal);
 }
-
 const profileBadge = document.getElementById("profileBadge");
+
 if (profileBadge) {
     profileBadge.addEventListener("click", openSettingsModal);
 }
 
-const closeSettingsModalBtn = document.getElementById("closeSettingsModal");
-if (closeSettingsModalBtn) {
-    closeSettingsModalBtn.addEventListener("click", () => {
-        document.getElementById("settingsModal").classList.remove("show");
-    });
-}
+// ===== PROFILE PICTURE FROM SETTINGS =====
 
-const settingsModalEl = document.getElementById("settingsModal");
-if (settingsModalEl) {
-    settingsModalEl.addEventListener("click", (e) => {
-        if (e.target === settingsModalEl) settingsModalEl.classList.remove("show");
-    });
-}
+const changeProfilePictureBtn =
+    document.getElementById("changeProfilePictureBtn");
 
-const saveSettingsBtn = document.getElementById("saveSettingsBtn");
-if (saveSettingsBtn) {
-    saveSettingsBtn.addEventListener("click", () => {
-        const nameInput = document.getElementById("settingsName");
-        if (nameInput && nameInput.value.trim()) {
-            const profile = getUserProfile() || {};
-            profile.name = nameInput.value.trim();
-            saveUserProfile(profile);
-            applyStoredName();
-        }
-        if (selectedThemeChoice) {
-            localStorage.setItem(THEME_KEY, JSON.stringify(selectedThemeChoice));
-        }
-        const savedMsg = document.getElementById("settingsSavedMsg");
-        if (savedMsg) {
-            savedMsg.style.display = "block";
-            setTimeout(() => (savedMsg.style.display = "none"), 1800);
+const removeProfilePictureBtn =
+    document.getElementById("removeProfilePictureBtn");
+
+const settingsProfilePicture =
+    document.getElementById("settingsProfilePicture");
+
+if (changeProfilePictureBtn) {
+    changeProfilePictureBtn.addEventListener("click", function () {
+
+        const input =
+            document.getElementById("profilePictureInput");
+
+        if (input) {
+            input.click();
         }
     });
 }
 
+if (settingsProfilePicture) {
+
+    const savedPicture =
+        localStorage.getItem("zenvyra_profile_picture");
+
+    if (savedPicture) {
+        settingsProfilePicture.src = savedPicture;
+    }
+}
+
+if (removeProfilePictureBtn) {
+
+    removeProfilePictureBtn.addEventListener("click", function () {
+
+        localStorage.removeItem("zenvyra_profile_picture");
+
+        const profilePicture =
+            document.getElementById("profilePicture");
+
+        if (profilePicture) {
+            profilePicture.src = "logo.png";
+        }
+
+        if (settingsProfilePicture) {
+            settingsProfilePicture.src = "logo.png";
+        }
+    });
+}
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener("click", () => {
@@ -1459,10 +1603,19 @@ document.querySelectorAll(".subject-nav-btn").forEach((btn) => {
 });
 
 /* ===============================
-   📄 FILES TOOL (base — no AI file analysis yet)
+   📄 FILES TOOL
    =============================== */
 
-const ALLOWED_FILE_TYPES = [".pdf", ".doc", ".docx", ".txt", ".png", ".jpg", ".jpeg"];
+const ALLOWED_FILE_TYPES = [
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".txt",
+    ".png",
+    ".jpg",
+    ".jpeg"
+];
+
 const MAX_FILE_SIZE_MB = 10;
 
 const fileToolInput = document.getElementById("fileToolInput");
@@ -1471,98 +1624,207 @@ const fileToolName = document.getElementById("fileToolName");
 const fileToolClearBtn = document.getElementById("fileToolClearBtn");
 const fileToolResult = document.getElementById("fileToolResult");
 
+let selectedFileForAnalysis = null;
+
 function resetFileTool() {
-    if (fileToolInput) fileToolInput.value = "";
-    if (fileToolChip) fileToolChip.style.display = "none";
-    if (fileToolResult) fileToolResult.innerHTML = "";
+    selectedFileForAnalysis = null;
+
+    if (fileToolInput) {
+        fileToolInput.value = "";
+    }
+
+    if (fileToolChip) {
+        fileToolChip.style.display = "none";
+    }
+
+    if (fileToolResult) {
+        fileToolResult.innerHTML = "";
+    }
+
+    const startBtn = document.getElementById("startFileAnalysisBtn");
+
+    if (startBtn) {
+        startBtn.remove();
+    }
 }
 
 if (fileToolInput) {
-    fileToolInput.addEventListener("change", async () => {
+
+    fileToolInput.addEventListener("change", () => {
+
         const file = fileToolInput.files[0];
+
         if (!file) return;
 
         const dotIndex = file.name.lastIndexOf(".");
-        const ext = dotIndex !== -1 ? file.name.slice(dotIndex).toLowerCase() : "";
+        const ext =
+            dotIndex !== -1
+                ? file.name.slice(dotIndex).toLowerCase()
+                : "";
 
         if (!ALLOWED_FILE_TYPES.includes(ext)) {
+
             if (fileToolResult) {
-                fileToolResult.innerHTML = `<p>⚠️ Unsupported file type "${ext || "unknown"}". Allowed: ${ALLOWED_FILE_TYPES.join(", ")}</p>`;
+                fileToolResult.innerHTML =
+                    `<p>⚠️ Unsupported file type "${ext || "unknown"}".</p>`;
             }
+
             resetFileTool();
             return;
         }
 
         if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+
             if (fileToolResult) {
-                fileToolResult.innerHTML = `<p>⚠️ "${file.name}" is too large. Max size is ${MAX_FILE_SIZE_MB}MB.</p>`;
+                fileToolResult.innerHTML =
+                    `<p>⚠️ "${file.name}" is too large. Maximum size is ${MAX_FILE_SIZE_MB}MB.</p>`;
             }
+
             resetFileTool();
             return;
         }
 
+        selectedFileForAnalysis = file;
+
         if (fileToolName) {
-            fileToolName.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            fileToolName.textContent =
+                `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
         }
 
-        if (fileToolChip) fileToolChip.style.display = "flex";
+        if (fileToolChip) {
+            fileToolChip.style.display = "flex";
+        }
 
-        if (file.type === "application/pdf" || file.type === "text/plain") {
-            if (fileToolResult) {
-                fileToolResult.innerHTML = `<p>⏳ Zenvyra is analyzing "${file.name}"...</p>`;
-            }
+        if (fileToolResult) {
+            fileToolResult.innerHTML = `
+                <p>📄 <strong>${file.name}</strong></p>
+                <p>✅ File is ready.</p>
+                <button
+                    type="button"
+                    id="startFileAnalysisBtn"
+                    class="create-account"
+                    style="margin-top:12px;"
+                >
+                    🚀 Start Analyzing
+                </button>
+            `;
+        }
 
-            try {
-                const base64Data = await fileToBase64(file);
+        const startBtn = document.getElementById("startFileAnalysisBtn");
 
-                const res = await fetch(
-                    "https://zenvyra-ai-production.up.railway.app/api/file",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            base64Data,
-                            mediaType: file.type,
-                            prompt: "Read this file carefully and explain its contents clearly. If it contains questions, solve them. Give a helpful answer for a student."
-                        })
-                    }
-                );
-
-                const data = await res.json();
-
-                if (!data.success) {
-                    throw new Error(data.message || "File analysis failed.");
-                }
-
-                if (fileToolResult) {
-                    fileToolResult.innerHTML =
-                        `<p><strong>📄 ${file.name}</strong></p>` +
-                        `<p><strong>✨ Zenvyra:</strong></p>` +
-                        `<div>${renderLiteMarkdown(data.reply)}</div>`;
-                }
-
-            } catch (error) {
-                console.error("File AI Error:", error);
-
-                if (fileToolResult) {
-                    fileToolResult.innerHTML =
-                        `<p>⚠️ Zenvyra couldn't analyze this file right now.</p>`;
-                }
-            }
-
-        } else {
-            if (fileToolResult) {
-                fileToolResult.innerHTML =
-                    `<p>✅ File "${file.name}" is ready.</p>`;
-            }
+        if (startBtn) {
+            startBtn.addEventListener("click", analyzeSelectedFile);
         }
     });
 }
 
+async function analyzeSelectedFile() {
+
+    const file = selectedFileForAnalysis;
+
+    if (!file) {
+        if (fileToolResult) {
+            fileToolResult.innerHTML =
+                `<p>⚠️ Please select a file first.</p>`;
+        }
+        return;
+    }
+
+    const startBtn = document.getElementById("startFileAnalysisBtn");
+
+    if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.textContent = "⏳ Analyzing...";
+    }
+
+    if (fileToolResult) {
+        fileToolResult.innerHTML = `
+            <p>⏳ Zenvyra is analyzing:</p>
+            <p><strong>📄 ${file.name}</strong></p>
+        `;
+    }
+
+    try {
+
+        const base64Data = await fileToBase64(file);
+
+       const res = await fetch(
+    "https://zenvyra-ai-production.up.railway.app/api/file",
+    {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+                body: JSON.stringify({
+                    base64Data: base64Data,
+                    mediaType: file.type || "application/pdf",
+                    prompt:
+                        "Read this file carefully and explain its contents clearly. If it contains questions, solve them. Give a helpful answer for a student."
+                })
+            }
+        );
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(
+                data.message || "File analysis failed."
+            );
+        }
+
+        if (fileToolResult) {
+            fileToolResult.innerHTML =
+                `<p><strong>📄 ${file.name}</strong></p>` +
+                `<p><strong>✨ Zenvyra:</strong></p>` +
+                `<div>${renderLiteMarkdown(data.reply)}</div>`;
+        }
+
+    } catch (error) {
+
+        console.error("File AI Error:", error);
+
+        if (fileToolResult) {
+            fileToolResult.innerHTML = `
+                <p>⚠️ Zenvyra couldn't analyze this file right now.</p>
+                <p>Please try again.</p>
+                <button
+                    type="button"
+                    id="retryFileAnalysisBtn"
+                    class="create-account"
+                >
+                    🔄 Try Again
+                </button>
+            `;
+        }
+
+        const retryBtn =
+            document.getElementById("retryFileAnalysisBtn");
+
+        if (retryBtn) {
+            retryBtn.addEventListener(
+                "click",
+                analyzeSelectedFile
+            );
+        }
+
+    } finally {
+
+        const startBtn =
+            document.getElementById("startFileAnalysisBtn");
+
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.textContent = "🚀 Start Analyzing";
+        }
+    }
+}
+
 if (fileToolClearBtn) {
-    fileToolClearBtn.addEventListener("click", resetFileTool);
+    fileToolClearBtn.addEventListener(
+        "click",
+        resetFileTool
+    );
 }
 
 /* ===============================
@@ -1640,5 +1902,140 @@ if (chatAttachmentBtn && chatAttachmentInput) {
         }
 
         chatAttachmentInput.value = "";
+    });
+}
+// ===== PROFILE PICTURE UPLOAD =====
+
+const profilePictureInputElement =
+    document.getElementById("profilePictureInput");
+
+const profilePictureElement =
+    document.getElementById("profilePicture");
+
+const profileBadgeElement =
+    document.getElementById("profileBadge");
+
+if (
+    profileBadgeElement &&
+    profilePictureInputElement &&
+    profilePictureElement
+) {
+
+    // Load saved profile picture
+    const savedProfilePicture =
+        localStorage.getItem("zenvyra_profile_picture");
+
+    if (savedProfilePicture) {
+        profilePictureElement.src = savedProfilePicture;
+    }
+
+    // Select picture
+    profilePictureInputElement.addEventListener("change", function () {
+
+        const file = this.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            alert("Please select an image.");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+
+            const imageData = event.target.result;
+
+            profilePictureElement.src = imageData;
+
+            localStorage.setItem(
+                "zenvyra_profile_picture",
+                imageData
+            );
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+// ===== SETTINGS SAVE =====
+
+const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+
+if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener("click", function () {
+
+        const settingsName = document.getElementById("settingsName");
+        const savedMsg = document.getElementById("settingsSavedMsg");
+
+        if (!settingsName) return;
+
+        const name = settingsName.value.trim();
+
+        if (name === "") {
+            alert("Please enter your name.");
+            return;
+        }
+
+        const profile = getUserProfile() || {};
+        profile.name = name;
+
+        localStorage.setItem(
+            "zenvyra_user_profile",
+            JSON.stringify(profile)
+        );
+
+        if (savedMsg) {
+            savedMsg.style.display = "block";
+
+            setTimeout(function () {
+                savedMsg.style.display = "none";
+            }, 2000);
+        }
+    });
+}
+
+
+// ===== LOGOUT =====
+
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async function () {
+
+        if (typeof supabaseClient !== "undefined") {
+            await supabaseClient.auth.signOut();
+        }
+
+        localStorage.removeItem("zenvyra_logged_in");
+        localStorage.removeItem("zenvyra_user_profile");
+
+        window.location.reload();
+    });
+}
+
+// ===== SETTINGS MODAL OPEN / CLOSE =====
+
+const settingsModal = document.getElementById("settingsModal");
+const settingsBtnFinal = document.getElementById("settingsBtn");
+const closeSettingsModalFinal = document.getElementById("closeSettingsModal");
+
+if (settingsBtnFinal && settingsModal) {
+    settingsBtnFinal.addEventListener("click", function () {
+        settingsModal.classList.add("show");
+    });
+}
+
+if (closeSettingsModalFinal && settingsModal) {
+    closeSettingsModalFinal.addEventListener("click", function () {
+        settingsModal.classList.remove("show");
+    });
+}
+
+// Click outside Settings box = close
+if (settingsModal) {
+    settingsModal.addEventListener("click", function (e) {
+        if (e.target === settingsModal) {
+            settingsModal.classList.remove("show");
+        }
     });
 }
