@@ -559,7 +559,7 @@ app.post("/api/vision", authenticate, async (req, res) => {
 // FILE
 // ===============================
 
-app.post("/api/file", authenticate, async (req, res) => {
+app.post("/api/file", async (req, res) => {
     try {
         const {
             base64Data,
