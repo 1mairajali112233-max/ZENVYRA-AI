@@ -27,7 +27,11 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || true;
 // ===============================
 
 app.use(cors({
-    origin: true,
+    origin: [
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "https://zenvyra-ai-production.up.railway.app"
+    ],
     credentials: true
 }));
 
