@@ -20,28 +20,18 @@ const supabase = createClient(
 
 const PORT = process.env.PORT || 3000;
 
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || true;
 
 // ===============================
 // MIDDLEWARE
 // ===============================
 
 app.use(cors({
-    origin: function (origin, callback) {
-        const allowedOrigins = [
-            "http://127.0.0.1:5500",
-            "http://localhost:5500"
-        ];
-
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
+    origin: [
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ],
     credentials: true
 }));
-
 
 app.use(cookieParser());
 
@@ -344,7 +334,7 @@ app.post("/api/chat", authenticate, async (req, res) => {
             });
         }
 
-        const userId = req.user._id.toString();
+        const userId = req.user.id.toString();
 
         const usage = getUserUsage(userId);
 
@@ -506,7 +496,7 @@ app.post("/api/vision", authenticate, async (req, res) => {
             });
         }
 
-        const userId = req.user._id.toString();
+        const userId = req.user.id.toString();
 
         const usage = getUserUsage(userId);
 
@@ -584,7 +574,7 @@ app.post("/api/file", authenticate, async (req, res) => {
             });
         }
 
-        const userId = req.user._id.toString();
+        const userId = req.user.id.toString();
 
         const usage = getUserUsage(userId);
 
