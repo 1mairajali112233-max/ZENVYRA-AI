@@ -1,0 +1,30 @@
+{
+  "name": "zenvyra-ai",
+  "version": "1.0.0",
+  "description": "Zenvyra AI - all-in-one AI study & teaching companion",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch backend/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Mairaj Ali",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@google/genai": "^2.19.0",
+    "@supabase/supabase-js": "^2.116.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mammoth": "^1.8.0",
+    "openai": "^7.8.0",
+    "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.17.2",
+    "docx": "^9.5.1",
+    "pptxgenjs": "^4.0.1"
+  }
+}
