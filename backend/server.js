@@ -29,14 +29,6 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "15mb" }));
 app.use(cookieParser());
 
-app.get("/api/health", (req, res) => {
-  res.json({ success: true, data: { status: "ok", env: config.nodeEnv } });
-});
-
-app.use("/api/auth", authRoutes);
-app.use("/api", chatRoutes); // /api/chat, /api/chat-json, /api/vision
-app.use("/api", fileRoutes);
- // /api/file
 app.use(
   cors({
     origin: "http://127.0.0.1:5500",
@@ -45,6 +37,16 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.get("/api/health", (req, res) => {
+  res.json({ success: true, data: { status: "ok", env: config.nodeEnv } });
+});
+
+app.use("/api/auth", authRoutes);
+app.use("/api", chatRoutes); // /api/chat, /api/chat-json, /api/vision
+app.use("/api", fileRoutes);
+ // /api/file
+
 
 // /api/tools/generate, /api/tools/export
 
