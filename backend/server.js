@@ -29,14 +29,26 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "15mb" }));
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: "http://127.0.0.1:5500",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+const allowedOrigin = "http://127.0.0.1:5500";
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", allowedOrigin);
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 app.get("/api/health", (req, res) => {
   res.json({ success: true, data: { status: "ok", env: config.nodeEnv } });
