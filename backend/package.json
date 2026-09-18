@@ -4,10 +4,10 @@
   "description": "Zenvyra AI - all-in-one AI study & teaching companion",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch backend/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "start": "node server.js",
+  "dev": "node --watch server.js",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
   "keywords": [],
   "author": "Mairaj Ali",
   "license": "ISC",
@@ -28,3 +28,4 @@
     "pptxgenjs": "^4.0.1"
   }
 }
+
