@@ -53,7 +53,7 @@ async function chat({ system, message, history = [] }) {
     ];
 
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       contents,
       config: system ? { systemInstruction: system } : undefined,
     });
@@ -123,7 +123,7 @@ async function chatVision({ system, message, imageBase64, mimeType }) {
 
   if (_clientType === "gemini") {
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       contents: [
         {
           role: "user",

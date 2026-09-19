@@ -74,6 +74,8 @@ process.on("uncaughtException", (err) => {
   console.error("Uncaught exception:", err);
 });
 
-app.listen(config.port, () => {
-  console.log(`Zenvyra backend running on port ${config.port} (${config.nodeEnv})`);
+const PORT = process.env.PORT || config.port || 8080;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Zenvyra backend running on port ${PORT} (${config.nodeEnv})`);
 });
