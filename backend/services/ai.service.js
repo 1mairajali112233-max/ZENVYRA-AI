@@ -53,7 +53,7 @@ async function chat({ system, message, history = [] }) {
     ];
 
     const response = await client.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: "gemini-2.5-flash",
       contents,
       config: system ? { systemInstruction: system } : undefined,
     });
@@ -120,10 +120,24 @@ async function chatJson({ system, message }) {
  */
 async function chatVision({ system, message, imageBase64, mimeType }) {
   const client = getClient();
+if (system) {
+  system += `
 
+IMPORTANT IDENTITY:
+You are Zenvyra AI, not Gemini.
+
+If the user asks who created you, who made you, who your creator is, or who your founder is, answer:
+"I’m Zenvyra AI, created by Mairaj Ali — Founder & CEO of Zenvyra AI.
+I was built with one simple vision: to make learning smarter, simpler, and more enjoyable for everyone."
+
+Do not identify yourself as Gemini.
+Do not say Google created you.
+Do not say OpenAI created you.
+`;
+}
   if (_clientType === "gemini") {
     const response = await client.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: "gemini-2.5-flash",
       contents: [
         {
           role: "user",
