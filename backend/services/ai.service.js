@@ -52,13 +52,45 @@ async function chat({ system, message, history = [] }) {
       { role: "user", parts: [{ text: message }] },
     ];
 
-    const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents,
-      config: system ? { systemInstruction: system } : undefined,
-    });
+    const config = system
+      ? { systemInstruction: system }
+      : undefined;
 
-    return response.text;
+    // Retry temporary Gemini 503/UNAVAILABLE errors
+    let lastError;
+
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const response = await client.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents,
+          config,
+        });
+
+        return response.text;
+      } catch (err) {
+        lastError = err;
+
+        const errorText = String(
+          err?.message || err || ""
+        ).toLowerCase();
+
+        const isTemporary =
+          errorText.includes("503") ||
+          errorText.includes("unavailable") ||
+          errorText.includes("high demand");
+
+        if (!isTemporary || attempt === 3) {
+          throw err;
+        }
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, attempt * 2000)
+        );
+      }
+    }
+
+    throw lastError;
   }
 
   if (_clientType === "openai") {
@@ -87,7 +119,9 @@ async function chat({ system, message, history = [] }) {
       ],
     });
 
-    return response.content.map((b) => (b.type === "text" ? b.text : "")).join("");
+    return response.content
+      .map((b) => (b.type === "text" ? b.text : ""))
+      .join("");
   }
 
   throw new Error("No AI client configured");
