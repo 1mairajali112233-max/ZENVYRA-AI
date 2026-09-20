@@ -14,7 +14,7 @@ const TOOL_INSTRUCTIONS={
 "revision-mode":"Create an active revision session for the topic. Include recall prompts, explanations, practice questions and a final self-check.",
 "writing-coach":"Review the supplied writing. Provide corrected text plus concise explanations and actionable improvement points.",
 "speaking-practice":"Create a speaking practice response and feedback appropriate to the scenario and level. Include a better natural version and useful phrases.",
-"mistake-analyzer":"Diagnose the mistake, explain the correct reasoning step by step, identify the misconception and provide one similar practice question.",
+"mistake-analyzer":"Analyze the student's mistake carefully. Compare the original question, student's answer, and correct answer. Explain exactly where the student's reasoning went wrong. Then give the correct solution step by step in simple language suitable for the student's class. Clearly identify the misconception or misunderstanding. Finish with one similar practice question for the student. Do not invent information and do not assume an answer when the supplied correct answer is missing.",
 "homework-reminders":"Turn the supplied tasks into a prioritized, realistic schedule. Preserve dates supplied by the user and do not invent exact dates.",
 "presentation":"Create a classroom presentation. IMPORTANT: return exactly the requested number of sections, one section per slide. Each section heading is the slide title and its items are concise slide bullets. Match the requested slide count and style.",
 "question-paper":"Create a balanced exam paper. Respect total marks, duration, question types and difficulty. Show marks for questions and include a separate answer key/marking guidance.",
@@ -39,14 +39,25 @@ function cleanResult(raw,toolTitle){
   return {title:String(raw.title||toolTitle),subtitle:String(raw.subtitle||"Created by Zenvyra AI"),sections};
 }
 
-router.post("/tools/generate",requireAuth,usageLimit("messages"),async(req,res)=>{
+router.post("/generate",requireAuth,usageLimit("messages"),async(req,res)=>{
   try{
     const {toolId,toolTitle,answers}=req.body||{};
     if(!toolId||!toolTitle||!answers)return fail(res,"Tool details are required.",400);
     const instruction=TOOL_INSTRUCTIONS[toolId];
     if(!instruction)return fail(res,"This tool is not configured.",400);
     const answerText=Object.entries(answers).map(([k,v])=>`${k}: ${String(v)}`).join("\n");
-    const system=`You are Zenvyra AI, a professional education assistant. ${instruction}
+    const system=`You are Zenvyra AI, a professional education assistant.
+
+IDENTITY:
+If the user asks who created you, who made you, who your creator is, or who your founder is, say:
+"I’m Zenvyra AI, created by Mairaj Ali — Founder & CEO of Zenvyra AI.
+I was built with one simple vision: to make learning smarter, simpler, and more enjoyable for everyone."
+
+Do not say that Google created you.
+Do not say that OpenAI created you.
+Do not say that another AI company created Zenvyra AI.
+
+${instruction}
 Return ONLY valid JSON with this exact shape:
 {"title":"string","subtitle":"string","sections":[{"heading":"string","items":["string"]}]}
 Use concise but complete content. Do not use markdown fences.`;
@@ -56,7 +67,7 @@ Use concise but complete content. Do not use markdown fences.`;
   }catch(err){console.error("tool generation error:",err.message);return aiFailure(res,err)}
 });
 
-router.post("/tools/export",requireAuth,async(req,res)=>{
+router.post("/export",requireAuth,async(req,res)=>{
  try{
   const {format,result,toolId}=req.body||{};
   if(!["pdf","docx","pptx"].includes(format))return fail(res,"Unsupported export format.",400);

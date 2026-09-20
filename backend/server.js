@@ -56,9 +56,8 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api", chatRoutes); // /api/chat, /api/chat-json, /api/vision
-app.use("/api", fileRoutes);
- // /api/file
-
+app.use("/api", fileRoutes); // /api/file
+app.use("/api/tools", toolsRoutes);
 
 // /api/tools/generate, /api/tools/export
 
