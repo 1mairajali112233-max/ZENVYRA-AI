@@ -18,13 +18,13 @@
     "@supabase/supabase-js": "^2.116.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "docx": "^9.5.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mammoth": "^1.8.0",
     "openai": "^7.8.0",
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.17.2",
+    "docx": "^9.5.1",
     "pptxgenjs": "^4.0.1"
   }
 }

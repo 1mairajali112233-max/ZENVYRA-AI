@@ -62,7 +62,7 @@ async function chat({ system, message, history = [] }) {
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         const response = await client.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-3.6-flash",
           contents,
           config,
         });
@@ -171,7 +171,7 @@ Do not say OpenAI created you.
 }
   if (_clientType === "gemini") {
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       contents: [
         {
           role: "user",

@@ -523,56 +523,85 @@ function fileToBase64(file){
 
 
     async function askChat(message){
-    const h=await authHeaders();
+    const question = String(message || "").trim().toLowerCase();
 
-    const r=await fetch(`${API_BASE}/api/chat`,{
+    // Zenvyra identity protection
+    if (
+        question.includes("who created you") ||
+        
+        question.includes("who made you") ||
+        question.includes("who is your creator") ||
+        question.includes("who is your founder") ||
+        question.includes("who built you") ||
+        question.includes("who developed you") ||
+        question.includes("who owns you")
+        
+    ) {
+        return "I’m Zenvyra AI, created by Mairaj Ali — Founder & CEO of Zenvyra AI.\n\nI was built with one simple vision: to make learning smarter, simpler, and more enjoyable for everyone.";
+    }
+console.log("🔥 NEW ASKCHAT RUNNING:", message);
+    const h = await authHeaders();
+
+    const r = await fetch(`${API_BASE}/api/chat`,{
         method:"POST",
         headers:{
             "Content-Type":"application/json",
             ...h
         },
         credentials:"include",
-        body:JSON.stringify({message})
+        body:JSON.stringify({
+            system:"You are Zenvyra AI, a professional education assistant. You are Zenvyra AI, not Gemini. Never claim that Google created Zenvyra AI.",
+            message:message
+        })
     });
 
-    const contentType=r.headers.get("content-type")||"";
-    const raw=await r.text();
+    const contentType = r.headers.get("content-type") || "";
+    const raw = await r.text();
 
-    console.log("Zenvyra /api/chat status:",r.status);
-    console.log("Zenvyra /api/chat response:",raw);
+    console.log("Zenvyra /api/chat status:", r.status);
+    console.log("Zenvyra /api/chat response:", raw);
 
     if(!contentType.includes("application/json")){
         throw Error(
-            `Server returned HTML instead of JSON (${r.status}). ` +
-            `Check that Railway backend is running and /api/chat exists.`
+            `Server returned HTML instead of JSON (${r.status}). Check that Railway backend is running.`
         );
     }
 
     let d;
 
     try{
-        d=JSON.parse(raw);
+        d = JSON.parse(raw);
     }catch{
         throw Error("Server returned invalid JSON.");
     }
 
     if(!r.ok){
-        throw Error(d?.message||d?.error||`AI request failed (${r.status}).`);
+        throw Error(
+            d?.message ||
+            d?.error ||
+            `AI request failed (${r.status}).`
+        );
     }
 
     if(!d?.success){
-        throw Error(d?.message||d?.error||"AI request failed.");
+        throw Error(
+            d?.message ||
+            d?.error ||
+            "AI request failed."
+        );
     }
 
-    const reply=d?.data?.reply;
+    const reply = d?.data?.reply;
 
-    if(typeof reply!=="string"||!reply.trim()){
-        console.error("Unexpected /api/chat JSON:",d);
+    if(typeof reply !== "string" || !reply.trim()){
+        console.error("Unexpected /api/chat JSON:", d);
         throw Error("AI server returned no reply.");
     }
 
     return reply;
 }
+
+    
 
 function sessions(){
     try{

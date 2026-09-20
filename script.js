@@ -32,15 +32,53 @@ function wait(ms) {
 
 async function askZenvyraAI(system, userMessage) {
     try {
-        const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: `${system}\n\nUser: ${userMessage}`
-            })
-        });
+        // If only one argument was provided, treat it as the user's question.
+        if (userMessage === undefined) {
+            userMessage = system;
+        }
+
+        const identitySystem = `
+You are Zenvyra AI, a professional education assistant.
+
+IDENTITY:
+You are Zenvyra AI, not Gemini.
+
+If the user asks:
+- Who created you?
+- Who made you?
+- Who is your creator?
+- Who is your founder?
+- Who built you?
+- Who developed you?
+or anything similar, answer:
+
+"I’m Zenvyra AI, created by Mairaj Ali — Founder & CEO of Zenvyra AI.
+I was built with one simple vision: to make learning smarter, simpler, and more enjoyable for everyone."
+
+Do not say that Google created Zenvyra AI.
+Do not say that OpenAI created Zenvyra AI.
+Do not identify yourself as Gemini.
+
+${system || ""}
+`;
+
+        const headers = await authHeaders();
+
+        const res = await fetch(
+            "https://zenvyra-ai-production.up.railway.app/api/chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...headers
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    system: identitySystem,
+                    message: userMessage
+                })
+            }
+        );
 
         const data = await res.json();
 
@@ -48,17 +86,17 @@ async function askZenvyraAI(system, userMessage) {
             if (data.limitReached) {
                 return "🚫 You have reached your Zenvyra AI message limit. Please try again later.";
             }
+
             throw new Error(data.message || "AI request failed.");
         }
 
-        return data.reply;
+        return data.data?.reply || data.reply || "Sorry, I couldn't generate a response.";
 
     } catch (error) {
         console.error("Zenvyra AI Error:", error);
         return "⚠️ Sorry, I couldn't connect to Zenvyra AI right now.";
     }
- }
- 
+}
 
 // Calls the backend for a JSON-shaped AI response (e.g. quiz generation).
 // `demoBuilder`, if provided, is only used as a fallback if the real call fails,
@@ -67,14 +105,17 @@ async function askZenvyraAIJson(system, userMessage, demoBuilder) {
     const profile = getUserProfile();
 const userId = profile?.email || profile?.name || "unknown-user";
     try {
-       const res = await  fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ system, message: userMessage })
-        });
+     const headers = await authHeaders();
 
+const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/chat-json", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        ...headers
+    },
+    credentials: "include",
+    body: JSON.stringify({ system, message: userMessage })
+});
         const data = await res.json();
 
         if (!data.success) {
@@ -133,37 +174,62 @@ function loadingHTML(label) {
 }
 
 // Calls the backend for a vision (image) AI response.
-async function askZenvyraAIVision(base64Data, mediaType, prompt) {
+async function askZenvyraAI(system, userMessage) {
     try {
-        const res = await fetch("https://zenvyra-ai-production.up.railway.app/api/vision", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ base64Data, mediaType, prompt })
-        });
+        // If called with only one argument
+        if (userMessage === undefined) {
+            userMessage = system;
+        }
+
+        const question = String(userMessage || "").trim().toLowerCase();
+
+        // Zenvyra identity protection
+        if (
+            question.includes("who created you") ||
+            question.includes("who made you") ||
+            question.includes("who is your creator") ||
+            question.includes("who is your founder") ||
+            question.includes("who built you") ||
+            question.includes("who developed you") ||
+            question.includes("who owns you")
+        ) {
+            return "I’m Zenvyra AI, created by Mairaj Ali — Founder & CEO of Zenvyra AI.\n\nI was built with one simple vision: to make learning smarter, simpler, and more enjoyable for everyone.";
+        }
+
+        const headers = await authHeaders();
+
+        const res = await fetch(
+            "https://zenvyra-ai-production.up.railway.app/api/chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...headers
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    system: system || "You are Zenvyra AI, a professional education assistant.",
+                    message: userMessage
+                })
+            }
+        );
 
         const data = await res.json();
 
         if (!data.success) {
+            if (data.limitReached) {
+                return "🚫 You have reached your Zenvyra AI message limit. Please try again later.";
+            }
+
             throw new Error(data.message || "AI request failed.");
         }
 
-        return data.reply;
+        return data.data?.reply || data.reply || "Sorry, I couldn't generate a response.";
 
     } catch (error) {
-        console.error("Zenvyra AI Vision Error:", error);
-        return "⚠️ Sorry, I couldn't read that photo right now.";
+        console.error("Zenvyra AI Error:", error);
+        return "⚠️ Sorry, I couldn't connect to Zenvyra AI right now.";
     }
-}
-
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
 }
 
 /* ===============================
