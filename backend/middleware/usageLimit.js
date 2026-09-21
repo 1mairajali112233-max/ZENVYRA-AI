@@ -41,14 +41,10 @@ function usageLimit(kind) {
 
   return async function (req, res, next) {
     if (!req.user) {
-      // requireAuth must run before usageLimit
       return fail(res, "You must be signed in to do that.", 401);
     }
 
     try {
-      // increment_usage is a Postgres function — see sql/001_usage_daily.sql.
-      // It atomically does: insert-or-update the row, +1 to the given column,
-      // and returns the new count. This avoids a read-then-write race.
       const { data, error } = await supabaseAdmin.rpc("increment_usage", {
         p_user_id: req.user.id,
         p_kind: kind,
@@ -56,27 +52,45 @@ function usageLimit(kind) {
 
       if (error) throw error;
 
-      const newCount = data; // function returns the new integer count
+      const newCount = Number(data);
 
       if (newCount > limit) {
+        // Daily reset = next midnight
+        const now = new Date();
+        const resetAt = new Date(now);
+        resetAt.setUTCHours(0, 0, 0, 0);
+        resetAt.setUTCDate(resetAt.getUTCDate() + 1);
+
+        const resetTime = resetAt.toISOString();
+
         return fail(
           res,
-          `Your daily Zenvyra limit has been reached. You can continue when your limit resets.`,
+          `Your daily ${FRIENDLY_KIND[kind] || kind} limit has been reached. Your limit will reset at ${resetTime}.`,
           429,
-          { limitReached: true, kind, limit }
+          {
+            limitReached: true,
+            kind,
+            limit,
+            used: limit,
+            remaining: 0,
+            resetAt: resetTime
+          }
         );
       }
 
-      req.usage = { kind, count: newCount, limit };
+      req.usage = {
+        kind,
+        count: newCount,
+        limit,
+        remaining: Math.max(0, limit - newCount)
+      };
+
       next();
     } catch (err) {
       console.error(`usageLimit(${kind}) error:`, err.message);
-      // Fail OPEN on infra errors so a Supabase hiccup doesn't take down chat —
-      // but log it loudly so it gets noticed. This is a deliberate tradeoff;
-      // flip to fail-closed if abuse becomes a concern.
+
+      // Keep fail-open for infrastructure errors.
       next();
     }
   };
 }
-
-module.exports = { usageLimit, FRIENDLY_KIND };
