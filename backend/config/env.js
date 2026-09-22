@@ -72,7 +72,7 @@ const config = {
   },
 
   limits: {
-    messagesPerDay: parseInt(process.env.LIMIT_MESSAGES_PER_DAY || "40", 10),
+    messagesPerDay: parseInt(process.env.LIMIT_MESSAGES_PER_DAY || "20", 10),
     filesPerDay: parseInt(process.env.LIMIT_FILES_PER_DAY || "2", 10),
     photosPerDay: parseInt(process.env.LIMIT_PHOTOS_PER_DAY || "3", 10),
     maxUploadSizeMb: parseInt(process.env.MAX_UPLOAD_SIZE_MB || "10", 10),
