@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zenvyra AI — Study & Teaching Companion</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="sidebarOverlay"></div>
+<aside id="sidebar">
+  <div class="brand"><img src="logo.png" alt="Zenvyra"><div><strong>Zenvyra</strong><span>AI Learning Studio</span></div><button id="sidebarCloseBtn" class="icon-btn">×</button></div>
+  <button id="newChatBtn" class="new-chat">＋ New Chat</button>
+  <nav>
+    <button id="navAskAiBtn">💬 Ask AI</button>
+    <button data-tool="lesson-explainer">📘 Lesson Explainer</button>
+    <button data-tool="quiz-generator">📝 Quiz Generator</button>
+    <button data-tool="notes-maker">🗒️ Notes Maker</button>
+    <button data-tool="study-planner">📅 Study Planner</button>
+    <button data-tool="photo-solver">📷 Photo Solver</button>
+    <button data-tool="file-solver">📎 File Solver</button>
+    <button id="historyToolBtn">🕘 Chat History</button>
+  </nav>
+  <div class="side-label" id="sidebarHistoryTitle">Recent chats</div>
+  <div id="leftSidebarHistory"></div>
+  <div class="sidebar-bottom">
+    <button id="settingsBtn">⚙️ Settings</button>
+    <button id="aboutZenvyraBtn">ⓘ About Zenvyra</button>
+  </div>
+</aside>
+
+<main class="shell">
+<header class="topbar">
+  <button id="hamburgerBtn" class="icon-btn">☰</button>
+  <div><div class="eyebrow">ZENVYRA</div><h1 id="topbarGreeting">Welcome to Zenvyra AI</h1></div>
+  <div class="top-actions"><button id="studentToolsBtn" class="mode-btn active">🎓 Student</button><button id="teacherToolsBtn" class="mode-btn">👨‍🏫 Teacher</button><button id="profileBadge" class="profile"><img id="profilePicture" src="logo.png" alt=""><span id="profileName">User</span></button></div>
+</header>
+
+<section id="dashboard" class="dashboard">
+  <div class="hero">
+    <div><span class="pill">AI-powered education workspace</span><h2>Learn clearly. Create confidently.</h2><p>Ask a question, understand a lesson, practice, create assessments, and plan teaching — all in one calm workspace.</p></div>
+    <div class="hero-mark"><img src="logo.png" alt="Zenvyra"></div>
+  </div>
+
+  <section id="studentCardsSection" class="tool-section">
+    <div class="section-heading"><div><span class="eyebrow">STUDENT TOOLS</span><h2>Study smarter</h2></div><p>Choose a tool to open its guided workflow.</p></div>
+    <div class="tool-grid" id="studentToolsGrid"></div>
+  </section>
+
+  <section id="teacherCardsSection" class="tool-section" hidden>
+    <div class="teacher-banner"><span class="banner-icon">👨‍🏫</span><div><span class="eyebrow">TEACHER WORKSPACE</span><h2>Plan, assess & teach</h2><p>Professional AI workflows built for classroom preparation and student support.</p></div></div>
+    <div class="tool-grid" id="teacherToolsGrid"></div>
+  </section>
+
+  <section class="chat-panel" id="chatPanel">
+    <div class="section-heading"><div><span class="eyebrow">OPEN CHAT</span><h2>Ask Zenvyra AI</h2></div><span class="status-dot">● Online</span></div>
+    <div id="chat-history"></div><div id="ai-response" class="ai-response"></div>
+    <div class="chat-input"><button id="chatAttachmentBtn" title="Attach file">📎</button><input id="ai-question" placeholder="Ask anything about your studies…" autocomplete="off"><button id="searchVoiceBtn" title="Voice">🎤</button><button id="chatSendBtn" class="send">➤</button></div>
+    <input type="file" id="chatAttachmentInput" hidden accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.webp">
+    <div id="voiceStatus" class="voice-status"></div>
+    <p class="microcopy"><img src="logo.png" alt=""> Real AI responses use your authenticated Zenvyra account.</p>
+  </section>
+</section>
+</main>
+
+<!-- Guided wizard -->
+<div id="wizardModal" class="modal" hidden>
+  <div class="wizard-card">
+    <button id="wizardClose" class="close-modal">×</button>
+    <div class="wizard-head"><div><span id="wizardEyebrow" class="eyebrow">AI TOOL</span><h2 id="wizardTitle">Tool</h2><p id="wizardDescription"></p></div><div class="wizard-step-count" id="wizardStepCount">Step 1 of 1</div></div>
+    <div class="progress-track"><div id="wizardProgress"></div></div>
+    <div id="wizardBody"></div>
+    <div class="wizard-actions"><button id="wizardBack" class="secondary">← Back</button><button id="wizardNext" class="primary">Continue →</button></div>
+    <div id="wizardStatus" class="wizard-status"></div>
+  </div>
+</div>
+
+<div id="resultModal" class="modal" hidden>
+  <div class="result-card">
+    <button id="resultClose" class="close-modal">×</button>
+    <div id="resultContent"></div>
+    <div class="result-actions"><button id="resultEdit" class="secondary">✎ Edit</button><button id="resultRegenerate" class="secondary">↻ Regenerate</button><div class="export-menu"><button id="downloadBtn" class="primary">Download ▾</button><div id="downloadMenu" class="download-menu" hidden><button data-format="pdf">PDF</button><button data-format="docx">DOCX</button><button data-format="pptx">PPTX</button></div></div></div>
+    <div id="exportStatus" class="export-status"></div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal" hidden><div class="small-modal">
+<button class="close-modal" id="closeSettingsModal">×</button><span class="eyebrow">ACCOUNT</span><h2>Settings</h2>
+<label>Display name<input id="settingsName"></label>
+<div class="settings-picture"><img id="settingsProfilePicture" src="logo.png"><button id="changeProfilePictureBtn" class="secondary">Change picture</button><button id="removeProfilePictureBtn" class="danger">Remove</button></div>
+<div class="swatches"><button data-accent="#78dfbc">Mint</button><button data-accent="#5aa9ff">Ocean</button><button data-accent="#ffb648">Sunset</button><button data-accent="#ff8fb0">Berry</button></div>
+<button id="saveSettingsBtn" class="primary full">Save settings</button><button id="clearHistoryBtn" class="danger full">Clear chat history</button><button id="logoutBtn" class="logout full">🚪 Log out</button><p id="settingsSavedMsg"></p></div></div>
+
+<div id="aboutModal" class="modal" hidden><div class="small-modal about"><button class="close-modal" id="closeAboutModal">×</button><img class="about-logo" src="logo.png"><span class="eyebrow">ABOUT ZENVYRA</span><h2>Zenvyra AI</h2><p>Your all-in-one AI study & teaching companion — built to make learning feel calm, clear and practical.</p><div class="founder"><strong>Created by Mairaj Ali</strong><span>Founder & CEO of Zenvyra AI</span></div></div></div>
+
+<div id="loginScreen" class="auth-screen">
+  <div class="auth-card"><img src="logo.png" class="auth-logo"><span class="eyebrow">WELCOME</span><h1 id="loginCardTitle">Welcome to Zenvyra AI</h1><p id="loginCardSubtitle">Create your account to get started.</p>
+    <div id="signupFields"><label>Name<input id="loginName" autocomplete="name" placeholder="Your name"></label><label>Contact<input id="loginPhone" placeholder="Phone number"></label><label>School / Organization<input id="loginSchool" placeholder="School or organization"></label></div>
+    <label>Email<input type="email" id="loginEmail" autocomplete="email" placeholder="Email address"></label><label>Password<input type="password" id="loginPassword" autocomplete="current-password" placeholder="At least 8 characters"></label>
+    <div id="loginRoleSection"><span class="field-label">Choose your role</span><div class="role-buttons"><button data-role="Student">🎓 Student</button><button data-role="Teacher">👨‍🏫 Teacher</button><button data-role="General">🌍 General</button></div><p id="selected-role">Please select a role</p></div>
+    <button id="authSubmitBtn" class="primary full">Create Account</button><button id="authToggleLink" class="text-btn">Already have an account? Log in</button><p id="welcome-message" class="auth-message"></p>
+  </div>
+</div>
+
+<div id="welcome-screen" class="auth-screen" hidden><div class="welcome-card"><img src="logo.png" class="auth-logo"><span class="eyebrow">YOUR ZENVYRA SPACE</span><h1>Welcome, <span id="welcome-name"></span>!</h1><div id="welcome-role" class="pill"></div><div class="founder"><strong>Created by Mairaj Ali</strong><span>Founder & CEO of Zenvyra AI</span></div><button id="openDashboardBtn" class="primary full">Continue to Zenvyra →</button></div></div>
+<input type="file" id="profilePictureInput" hidden accept="image/*">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js" defer></script>
+</body>
+</html>
