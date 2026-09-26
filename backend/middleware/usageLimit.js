@@ -69,11 +69,8 @@ const year = parts.find(p => p.type === "year").value;
 const month = parts.find(p => p.type === "month").value;
 const day = parts.find(p => p.type === "day").value;
 
-// Pakistan midnight (+05:00), then next day
-const resetAt = new Date(`${year}-${month}-${day}T00:00:00+05:00`);
-resetAt.setUTCDate(resetAt.getUTCDate() + 1);
-
-const resetTime = resetAt.toLocaleString("en-PK", {
+// Next reset = midnight Pakistan Time
+const resetTime = new Intl.DateTimeFormat("en-PK", {
   timeZone: "Asia/Karachi",
   year: "numeric",
   month: "long",
@@ -81,8 +78,9 @@ const resetTime = resetAt.toLocaleString("en-PK", {
   hour: "numeric",
   minute: "2-digit",
   hour12: true
-}) + " (Pakistan Time)";
-
+}).format(
+  new Date(Date.now() + 24 * 60 * 60 * 1000)
+) + " (Pakistan Time)";
         return fail(
           res,
           `Your daily ${FRIENDLY_KIND[kind] || kind} limit has been reached. Your limit will reset at ${resetTime}.`,
