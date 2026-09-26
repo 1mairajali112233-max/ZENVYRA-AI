@@ -170,6 +170,7 @@ Do not say OpenAI created you.
 `;
 }
   if (_clientType === "gemini") {
+    console.log("🔥 GEMINI MODEL IN RUNTIME:", "gemini-3.5-flash-lite");
     const response = await client.models.generateContent({
       model: "gemini-3.5-flash-lite",
       contents: [
