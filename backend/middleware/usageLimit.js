@@ -93,7 +93,7 @@ const resetTime = resetAt.toLocaleString("en-PK", {
             limit,
             used: limit,
             remaining: 0,
-           resetAt: "TEST-PAKISTAN-TIME"
+           resetAt: "resetTime"
           }
         );
       }
