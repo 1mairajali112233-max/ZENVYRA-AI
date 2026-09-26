@@ -55,13 +55,33 @@ function usageLimit(kind) {
       const newCount = Number(data);
 
       if (newCount > limit) {
-        // Daily reset = next midnight
-        const now = new Date();
-        const resetAt = new Date(now);
-        resetAt.setUTCHours(0, 0, 0, 0);
-        resetAt.setUTCDate(resetAt.getUTCDate() + 1);
+       // Daily reset = next midnight Pakistan Time (PKT)
+const now = new Date();
 
-        const resetTime = resetAt.toISOString();
+const parts = new Intl.DateTimeFormat("en-US", {
+  timeZone: "Asia/Karachi",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+}).formatToParts(now);
+
+const year = parts.find(p => p.type === "year").value;
+const month = parts.find(p => p.type === "month").value;
+const day = parts.find(p => p.type === "day").value;
+
+// Pakistan midnight (+05:00), then next day
+const resetAt = new Date(`${year}-${month}-${day}T00:00:00+05:00`);
+resetAt.setUTCDate(resetAt.getUTCDate() + 1);
+
+const resetTime = resetAt.toLocaleString("en-PK", {
+  timeZone: "Asia/Karachi",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true
+}) + " (Pakistan Time)";
 
         return fail(
           res,
