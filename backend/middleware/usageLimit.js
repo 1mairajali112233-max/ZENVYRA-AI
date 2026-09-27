@@ -70,17 +70,24 @@ const month = parts.find(p => p.type === "month").value;
 const day = parts.find(p => p.type === "day").value;
 
 // Next reset = midnight Pakistan Time
+const nowPakistan = new Date(
+    new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Karachi"
+    })
+);
+
+const resetPakistan = new Date(nowPakistan);
+resetPakistan.setHours(24, 0, 0, 0);
+
 const resetTime = new Intl.DateTimeFormat("en-PK", {
-  timeZone: "Asia/Karachi",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  hour12: true
-}).format(
-  new Date(Date.now() + 24 * 60 * 60 * 1000)
-) + " (Pakistan Time)";
+    timeZone: "Asia/Karachi",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+}).format(resetPakistan) + " (Pakistan Time)";
         return fail(
           res,
           `Your daily ${FRIENDLY_KIND[kind] || kind} limit has been reached. Your limit will reset at ${resetTime}.`,
