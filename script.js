@@ -24,8 +24,7 @@ const TEACHER_TOOLS=[
 {id:"answer-checker",icon:"✅",title:"AI Answer Checker",desc:"Evaluate a student's answer and explain what to improve.",steps:[["question","Question","Enter the question.","textarea"],["correct","Expected answer","Enter the model/correct answer.","textarea"],["student","Student answer","Paste the student's answer.","textarea"]],export:[]},
 {id:"class-performance",icon:"📊",title:"Class Performance Analyzer",desc:"Turn scores into class-level insights and priorities.",steps:[["scores","Class scores","Paste names and scores, one per line.","textarea"],["assessment","Assessment","What test or assessment was this?","text"],["goal","Analysis goal","Choose what you need.","options",["Identify Weak Areas","Plan Remediation","Compare Performance","Full Analysis"]]],export:["pdf","docx"]},
 {id:"weak-topic-finder",icon:"🎯",title:"Weak Topic Finder",desc:"Identify topics students struggle with from evidence.",steps:[["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["evidence","Evidence","Describe results, mistakes or common errors.","textarea"],["action","Next action","What should the AI prioritize?","options",["Topics Only","Topics + Reasons","Topics + Remediation"]]],export:["pdf","docx"]},
-{id:"report-card-picture",icon:"🖼️",title:"Report Card — Picture",desc:"Upload a report card image and receive a careful AI analysis.",steps:[["photo","Upload report card","Choose a clear PNG, JPG or WEBP image.","file"],["name","Student name","Enter the student's name.","text"],["focus","What should we focus on?","Optional: performance, strengths, weaknesses or recommendations.","textarea"]],export:["pdf","docx"]},
-{id:"student-progress",icon:"📈",title:"Student Progress",desc:"Summarize one student's progress over time.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["notes","Progress evidence","Scores, observations, attendance, strengths and concerns.","textarea"],["focus","Focus","Choose the report focus.","options",["Academic Progress","Support Plan","Parent Summary","Full Progress Review"]]],export:["pdf","docx"]},
+{id:"report-card-picture",icon:"🖼️",title:"Report Card — Picture",desc:"Upload a report card image and fill the requested information directly into it.",steps:[["photo","Upload report card","Choose a clear PNG, JPG or WEBP image.","file"],["name","Student Name","Enter the student's name.","text"],["class","Class","Enter the student's class.","text"],["parentsName","Parents Name","Enter the parent's name.","text"],["description","Description","Enter the description if the report card asks for one.","textarea"]],export:["pdf","docx"]},{id:"student-progress",icon:"📈",title:"Student Progress",desc:"Summarize one student's progress over time.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["notes","Progress evidence","Scores, observations, attendance, strengths and concerns.","textarea"],["focus","Focus","Choose the report focus.","options",["Academic Progress","Support Plan","Parent Summary","Full Progress Review"]]],export:["pdf","docx"]},
 {id:"homework-creator",icon:"🏠",title:"Homework Creator",desc:"Create meaningful homework matched to class and topic.",steps:[["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["topic","Topic","Enter the homework topic.","text"],["difficulty","Difficulty","Choose the challenge.","options",["Easy","Medium","Hard","Mixed"]],["count","Number of tasks","How many tasks?","select",["5","10","15","20"]]],export:["pdf","docx"]},
 {id:"student-report",icon:"📄",title:"Student Report Generator",desc:"Create a formal, teacher-ready student report.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["details","Student details","Performance, attendance, behavior, strengths and weaknesses.","textarea"],["tone","Report style","Choose the tone.","options",["Formal","Supportive","Parent Friendly","Detailed"]]],export:["pdf","docx"]},
 {id:"class-activity",icon:"🎨",title:"Class Activity Generator",desc:"Design an engaging activity with objectives and materials.",steps:[["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["topic","Topic","Enter the topic.","text"],["duration","Duration","How long is the activity?","select",["10 minutes","20 minutes","30 minutes","45 minutes","60 minutes"]],["style","Activity style","Choose the format.","options",["Individual","Pairs","Groups","Whole Class","Mixed"]]],export:["pdf","docx"]}];
@@ -145,7 +144,7 @@ function renderWizardStep(){
         control=`<textarea id="wizardInput" rows="6" placeholder="Type your answer…"></textarea>`;
     }
     else if(type==="file"){
-        control=`<input id="wizardInput" type="file" accept="${currentTool.id==="photo-solver"?"image/png,image/jpeg,image/webp":".pdf,.docx,.txt"}"><div id="fileMeta" class="file-meta"></div>`;
+        control=`<input id="wizardInput" type="file" accept="${currentTool.id==="photo-solver"||currentTool.id==="report-card-picture"?"image/png,image/jpeg,image/webp":".pdf,.docx,.txt"}"<div id="fileMeta" class="file-meta"></div>`;
     }
     else{
         control=`<input id="wizardInput" type="text" placeholder="Type your answer…">`;
@@ -257,39 +256,97 @@ async function generateTool(){
     try{
         let result;
 
-        if(currentTool.id==="report-card-picture"){
-            const file=currentAnswers.photo;
-            if(!file)throw Error("Please upload a report card image.");
+        
+if(currentTool.id==="report-card-picture"){
+    const file=currentAnswers.photo;
 
-            const base64=await fileToBase64(file);
-            const h=await authHeaders();
+    if(!file){
+        throw Error("Please upload a report card image.");
+    }
 
-            const r=await fetch(`${API_BASE}/api/vision`,{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json",
-                    ...h
-                },
-                body:JSON.stringify({
-                    base64Data:base64,
-                    mediaType:file.type,
-                    prompt:`Analyze this student report card carefully. Student name: ${currentAnswers.name||"Not provided"}. Focus: ${currentAnswers.focus||"overall performance, strengths, weaknesses and practical recommendations"}. Do not invent information that is not visible.`
-                })
-            });
+    const base64=await fileToBase64(file);
+    const h=await authHeaders();
 
-            const d=await r.json();
+    const r=await fetch(`${API_BASE}/api/vision`,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            ...h
+        },
+        body:JSON.stringify({
+            base64Data:base64,
+            mediaType:file.type,
+            prompt:`You are filling a student report card.
 
-            if(!d.success)throw Error(d.message||"Report card analysis failed.");
+Look carefully at the uploaded report card image and identify the locations of these fields:
+1. Student Name
+2. Class
+3. Parents Name
+4. Description
 
-            result={
-                title:"Report Card Analysis",
-                subtitle:file.name,
-                sections:[{
-                    heading:"Zenvyra's Analysis",
-                    items:[d.data.reply]
-                }]
-            };
+Return ONLY valid JSON in this exact format:
+
+{
+  "fields":{
+    "name":{"x":0,"y":0,"width":0,"height":0},
+    "class":{"x":0,"y":0,"width":0,"height":0},
+    "parentsName":{"x":0,"y":0,"width":0,"height":0},
+    "description":{"x":0,"y":0,"width":0,"height":0}
+  }
+}
+
+IMPORTANT:
+- x, y, width and height must be normalized numbers between 0 and 1.
+- x and y represent the top-left corner of the area where the text should be written.
+- width and height represent the available writing area.
+- Find the blank area next to the matching label.
+- Do not invent fields.
+- Return ONLY JSON.
+
+Student Name to write: ${currentAnswers.name||""}
+Class to write: ${currentAnswers.class||""}
+Parents Name to write: ${currentAnswers.parentsName||""}
+Description to write: ${currentAnswers.description||""}`
+        })
+    });
+
+    const d=await r.json();
+
+    if(!d.success){
+        throw Error(d.message||"Could not analyze the report card.");
+    }
+
+    let locations;
+
+    try{
+        locations=JSON.parse(
+            String(d.data.reply)
+                .replace(/```json/g,"")
+                .replace(/```/g,"")
+                .trim()
+        );
+    }catch(e){
+        throw Error("Zenvyra could not detect the report card fields. Please use a clearer image.");
+    }
+
+    const imageResult=await createFilledReportCard(
+        file,
+        locations.fields||{},
+        {
+            name:currentAnswers.name||"",
+            class:currentAnswers.class||"",
+            parentsName:currentAnswers.parentsName||"",
+            description:currentAnswers.description||""
         }
+    );
+
+    result={
+        title:"Completed Report Card",
+        subtitle:"Filled by Zenvyra AI",
+        imageData:imageResult,
+        sections:[]
+    };
+}
         else if(currentTool.id==="photo-solver"){
             const file=currentAnswers.photo;
             if(!file)throw Error("Please upload a photo.");
@@ -395,11 +452,35 @@ async function generateTool(){
 }
 
 function showResult(result){
+    const imageHtml = result.imageData
+        ? `
+            <section class="result-section report-card-result">
+                <h4>Completed Report Card</h4>
+                <img
+                    src="${result.imageData}"
+                    alt="Completed student report card"
+                    style="display:block;width:100%;max-width:900px;height:auto;margin:20px auto;border-radius:12px;"
+                >
+                <a
+                    href="${result.imageData}"
+                    download="completed-report-card.png"
+                    class="btn"
+                    style="display:inline-block;margin-top:10px;text-decoration:none;"
+                >
+                    Download Report Card
+                </a>
+            </section>
+        `
+        : "";
+
     $("resultContent").innerHTML=
         `<div class="result-body">
         <span class="eyebrow">YOUR RESULT</span>
         <h2>${escapeHtml(result.title||currentTool.title)}</h2>
         <p class="subtitle">${escapeHtml(result.subtitle||"Generated by Zenvyra AI")}</p>
+
+        ${imageHtml}
+
         ${(result.sections||[]).map(s=>
             `<section class="result-section">
             <h4>${escapeHtml(s.heading||"Section")}</h4>
@@ -409,19 +490,21 @@ function showResult(result){
             </section>`
         ).join("")}
         </div>`;
-
-    $("resultModal").hidden=false;
+    
+    $("resultModal").classList.add("show");
+ $("resultModal").hidden=false;
     $("downloadMenu").hidden=true;
     $("exportStatus").textContent="";
+}
 
-    const allowed=currentTool.export||[];
+    const allowed = ["pdf", "docx"];
 
     document.querySelectorAll("#downloadMenu [data-format]").forEach(b=>{
         b.style.display=allowed.includes(b.dataset.format)?"block":"none";
     });
 
-    $("downloadBtn").style.display=allowed.length?"":"none";
-}
+    $("downloadBtn").style.display = allowed.length ? "inline-flex" : "none";
+
 
 $("resultClose").onclick=()=>{
     $("resultModal").hidden=true;
@@ -517,6 +600,106 @@ function fileToBase64(file){
 
         r.onerror=reject;
         r.readAsDataURL(file);
+    });
+}
+function createFilledReportCard(file, fields, values){
+    return new Promise((resolve,reject)=>{
+        const img=new Image();
+
+        img.onload=()=>{
+            try{
+                const canvas=document.createElement("canvas");
+                canvas.width=img.naturalWidth;
+                canvas.height=img.naturalHeight;
+
+                const ctx=canvas.getContext("2d");
+                ctx.drawImage(img,0,0);
+
+                const fieldNames=[
+                    ["name","name"],
+                    ["class","class"],
+                    ["parentsName","parentsName"],
+                    ["description","description"]
+                ];
+
+                ctx.fillStyle="#173f3a";
+                ctx.textBaseline="top";
+
+                fieldNames.forEach(([field,key])=>{
+                    const box=fields[field];
+                    const value=values[key];
+
+                    if(!box || !value)return;
+
+                    const x=Number(box.x)*canvas.width;
+                    const y=Number(box.y)*canvas.height;
+                    const width=Number(box.width)*canvas.width;
+                    const height=Number(box.height)*canvas.height;
+
+                    if(
+                        !Number.isFinite(x) ||
+                        !Number.isFinite(y) ||
+                        !Number.isFinite(width) ||
+                        !Number.isFinite(height) ||
+                        width<=0 ||
+                        height<=0
+                    )return;
+
+                    const fontSize=Math.max(
+                        14,
+                        Math.min(32,height*0.65)
+                    );
+
+                    ctx.font=`${fontSize}px Arial`;
+
+                    let text=String(value);
+                    const words=text.split(/\s+/);
+                    const lines=[];
+                    let line="";
+
+                    words.forEach(word=>{
+                        const test=line ? `${line} ${word}` : word;
+
+                        if(ctx.measureText(test).width<=width){
+                            line=test;
+                        }else{
+                            if(line)lines.push(line);
+                            line=word;
+                        }
+                    });
+
+                    if(line)lines.push(line);
+
+                    const lineHeight=fontSize*1.2;
+
+                    lines.forEach((lineText,index)=>{
+                        if(index*lineHeight<height){
+                            ctx.fillText(
+                                lineText,
+                                x,
+                                y+(index*lineHeight)
+                            );
+                        }
+                    });
+                });
+
+                const outputType=
+                    file.type==="image/jpeg"
+                    ? "image/jpeg"
+                    : "image/png";
+
+                resolve(canvas.toDataURL(outputType,0.95));
+
+            }catch(err){
+                reject(err);
+            }
+        };
+
+        img.onerror=()=>{
+            reject(new Error("Could not load the report card image."));
+        };
+
+        img.src=URL.createObjectURL(file);
     });
 }
 
