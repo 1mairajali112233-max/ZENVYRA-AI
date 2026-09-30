@@ -8,25 +8,89 @@
 </head>
 <body>
 <div id="sidebarOverlay"></div>
+
 <aside id="sidebar">
-  <div class="brand"><img src="logo.png" alt="Zenvyra"><div><strong>Zenvyra</strong><span>AI Learning Studio</span></div><button id="sidebarCloseBtn" class="icon-btn">×</button></div>
-  <button id="newChatBtn" class="new-chat">＋ New Chat</button>
-  <nav>
-    <button id="navAskAiBtn">💬 Ask AI</button>
-    <button data-tool="lesson-explainer">📘 Lesson Explainer</button>
-    <button data-tool="quiz-generator">📝 Quiz Generator</button>
-    <button data-tool="notes-maker">🗒️ Notes Maker</button>
-    <button data-tool="study-planner">📅 Study Planner</button>
-    <button data-tool="photo-solver">📷 Photo Solver</button>
-    <button data-tool="file-solver">📎 File Solver</button>
-    <button id="historyToolBtn">🕘 Chat History</button>
-  </nav>
-  <div class="side-label" id="sidebarHistoryTitle">Recent chats</div>
-  <div id="leftSidebarHistory"></div>
-  <div class="sidebar-bottom">
-    <button id="settingsBtn">⚙️ Settings</button>
-    <button id="aboutZenvyraBtn">ⓘ About Zenvyra</button>
+
+  <div class="brand">
+    <img src="logo.png" alt="Zenvyra">
+    <div>
+      <strong>Zenvyra</strong>
+      <span>AI Learning Studio</span>
+    </div>
+    <button id="sidebarCloseBtn" class="icon-btn">×</button>
   </div>
+
+  <button id="newChatBtn" class="new-chat">＋ New Chat</button>
+
+  <nav class="sidebar-nav">
+
+    <!-- Main navigation -->
+    <div class="sidebar-section">
+      <div class="side-label">Main</div>
+
+      <button id="dashboardBtn" class="sidebar-nav-btn">
+        🏠 Dashboard
+      </button>
+
+      <button id="navAskAiBtn" class="sidebar-nav-btn">
+        💬 Ask AI
+      </button>
+    </div>
+
+    <!-- Tools -->
+    <div class="sidebar-section">
+      <div class="side-label">Tools</div>
+
+      <button data-tool="lesson-explainer" class="sidebar-nav-btn">
+        📘 Lesson Explainer
+      </button>
+
+      <button data-tool="quiz-generator" class="sidebar-nav-btn">
+        📝 Quiz Generator
+      </button>
+
+      <button data-tool="notes-maker" class="sidebar-nav-btn">
+        🗒️ Notes Maker
+      </button>
+
+      <button data-tool="study-planner" class="sidebar-nav-btn">
+        📅 Study Planner
+      </button>
+
+      <button data-tool="photo-solver" class="sidebar-nav-btn">
+        📷 Photo Solver
+      </button>
+
+      <button data-tool="file-solver" class="sidebar-nav-btn">
+        📎 File Solver
+      </button>
+    </div>
+
+   <!-- History -->
+<div class="sidebar-section">
+  <button id="historyToolBtn" class="sidebar-nav-btn">
+    🕘 Chat History
+  </button>
+
+  <div class="side-label" id="sidebarHistoryTitle">
+    Recent chats
+  </div>
+
+  <div id="leftSidebarHistory"></div>
+</div>
+
+</nav>
+
+  <div class="sidebar-bottom">
+    <button id="settingsBtn" class="sidebar-nav-btn">
+      ⚙️ Settings
+    </button>
+
+    <button id="aboutZenvyraBtn" class="sidebar-nav-btn">
+      ⓘ About Zenvyra
+    </button>
+  </div>
+
 </aside>
 
 <main class="shell">

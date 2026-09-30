@@ -3,31 +3,44 @@ const SUPABASE_KEY="sb_publishable_Q9oFojJYkkUMnHIykKxCjQ_IeFAGXew";
 const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const API_BASE="https://zenvyra-ai-production.up.railway.app";
 const USER_PROFILE_KEY="zenvyra_user_profile",LOGGED_IN_KEY="zenvyra_logged_in",WELCOME_SEEN_KEY="zenvyra_welcome_seen",CHAT_SESSIONS_KEY="zenvyra_chat_sessions";
+const THEME_KEY="zenvyra_theme",ACCENT_KEY="zenvyra_accent",PICTURE_KEY="zenvyra_profile_picture",DEFAULT_ACCENT="#78dfbc";
+/* Clean default avatar (used when no profile picture is saved) */
+const DEFAULT_PICTURE="data:image/svg+xml;utf8,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='#d9f3ec'/><circle cx='32' cy='25' r='11' fill='#2f8f83'/><path d='M10 56c3-13 14-19 22-19s19 6 22 19z' fill='#2f8f83'/></svg>");
+/* Below this width the sidebar is an overlay drawer (must match style.css) */
+const MOBILE_BP=900;
 let selectedRole="",loginMode="signup",activeSession=null,currentTool=null,currentAnswers={},currentResult=null,generating=false,exporting=false;
 
+/* Shared option lists (identical values to the original per-tool lists) */
+const G12=Array.from({length:12},(_,i)=>`Grade ${i+1}`);
+const G14=["Nursery","KG",...G12];
+const S8=["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"];
+const S7=["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"];
+const S6=["Mathematics","English","Science","Computer","Sindhi","Urdu"];
+
 const STUDENT_TOOLS=[
-{id:"quiz-generator",icon:"📝",title:"Quiz Generator",desc:"Create a tailored quiz with questions, difficulty and types.",steps:[["class","What class are you in?","Select your class.","select",["Nursery","KG",...Array.from({length:12},(_,i)=>`Grade ${i+1}`)]],["subject","Which subject?","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"]],["topic","What topic should the quiz cover?","Enter a chapter, lesson or topic.","text"],["count","How many questions?","Choose the number of questions.","select",["5","10","15","20"]],["type","Choose question type","Select the assessment format.","options",["MCQ","Short Answer","Long Answer","True-False","Mixed"]],["difficulty","Choose difficulty","Match the level to your learners.","options",["Easy","Medium","Hard","Mixed"]]],export:["pdf","docx"]},
-{id:"notes-maker",icon:"🗒️",title:"Notes Maker",desc:"Turn a topic into clear, structured study notes.",steps:[["class","What class are you in?","Choose your level.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Which subject?","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"]],["topic","What topic should the notes cover?","Enter the topic.","text"],["format","How should the notes be organized?","Choose a structure.","options",["Quick Revision","Detailed Notes","Exam Notes","Key Points + Examples"]]],export:["pdf","docx"]},
-{id:"lesson-explainer",icon:"📘",title:"Lesson Explainer",desc:"Get a clear, level-appropriate explanation of any lesson.",steps:[["class","What class are you in?","Choose your class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Which subject?","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"]],["topic","Which lesson or topic?","Enter what you want explained.","text"],["style","How should Zenvyra explain it?","Choose the explanation style.","options",["Simple & Clear","Step by Step","With Examples","Exam Focused"]]],export:[]},
+{id:"quiz-generator",icon:"📝",title:"Quiz Generator",desc:"Create a tailored quiz with questions, difficulty and types.",steps:[["class","What class are you in?","Select your class.","select",G14],["subject","Which subject?","Choose the subject.","select",S8],["topic","What topic should the quiz cover?","Enter a chapter, lesson or topic.","text"],["count","How many questions?","Choose the number of questions.","select",["5","10","15","20"]],["type","Choose question type","Select the assessment format.","options",["MCQ","Short Answer","Long Answer","True-False","Mixed"]],["difficulty","Choose difficulty","Match the level to your learners.","options",["Easy","Medium","Hard","Mixed"]]],export:["pdf","docx"]},
+{id:"notes-maker",icon:"🗒️",title:"Notes Maker",desc:"Turn a topic into clear, structured study notes.",steps:[["class","What class are you in?","Choose your level.","select",G12],["subject","Which subject?","Choose the subject.","select",S8],["topic","What topic should the notes cover?","Enter the topic.","text"],["format","How should the notes be organized?","Choose a structure.","options",["Quick Revision","Detailed Notes","Exam Notes","Key Points + Examples"]]],export:["pdf","docx"]},
+{id:"lesson-explainer",icon:"📘",title:"Lesson Explainer",desc:"Get a clear, level-appropriate explanation of any lesson.",steps:[["class","What class are you in?","Choose your class.","select",G12],["subject","Which subject?","Choose the subject.","select",S8],["topic","Which lesson or topic?","Enter what you want explained.","text"],["style","How should Zenvyra explain it?","Choose the explanation style.","options",["Simple & Clear","Step by Step","With Examples","Exam Focused"]]],export:[]},
 {id:"study-planner",icon:"📅",title:"Study Planner",desc:"Build a practical plan around your subjects and available time.",steps:[["subjects","Which subjects do you need to study?","List subjects separated by commas.","text"],["days","How many days?","Choose your planning window.","select",["3","5","7","14","30"]],["hours","How much time per day?","Approximate study time.","select",["30 minutes","1 hour","2 hours","3 hours","4+ hours"]],["priority","What is your priority?","Choose the main goal.","options",["Exam Preparation","Homework","Revision","Balanced Study"]]],export:["pdf","docx"]},
-{id:"revision-mode",icon:"🔁",title:"Revision Mode",desc:"Turn a topic into an active revision session.",steps:[["class","Class","Choose your level.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose a subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["topic","Topic","What should we revise?","text"],["mode","Revision style","Choose how you want to practice.","options",["Quick Recall","Teach Me Then Test Me","Exam Drill","Mixed Practice"]]],export:[]},
+{id:"revision-mode",icon:"🔁",title:"Revision Mode",desc:"Turn a topic into an active revision session.",steps:[["class","Class","Choose your level.","select",G12],["subject","Subject","Choose a subject.","select",S7],["topic","Topic","What should we revise?","text"],["mode","Revision style","Choose how you want to practice.","options",["Quick Recall","Teach Me Then Test Me","Exam Drill","Mixed Practice"]]],export:[]},
 {id:"writing-coach",icon:"✍️",title:"Writing & Grammar Coach",desc:"Improve writing, grammar, clarity and structure.",steps:[["task","What do you want to improve?","Choose the writing task.","options",["Grammar Correction","Essay","Paragraph","Email/Letter","Creative Writing"]],["text","Your writing","Paste or type your writing.","textarea"],["goal","Main goal","What should Zenvyra focus on?","options",["Grammar","Clarity","Vocabulary","Structure","Everything"]]],export:[]},
 {id:"speaking-practice",icon:"🗣️",title:"English Speaking Practice",desc:"Practice realistic conversations and receive feedback.",steps:[["scenario","Scenario","Choose a conversation setting.","options",["Daily Conversation","Ordering Food","Job Interview","School Presentation","Travel"]],["level","Your level","Choose your speaking level.","options",["Beginner","Intermediate","Advanced"]],["response","Your response","Type what you would say, or use voice input.","textarea"]],export:[]},
-{id:"mistake-analyzer",icon:"🔍",title:"Mistake Analyzer",desc:"Understand mistakes and learn the correct method.",steps:[["subject","Subject","Choose a subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu"]],["question","Question","Enter the original question.","textarea"],["answer","Your answer","Enter your answer.","textarea"],["correct","Correct answer","If known, enter the correct answer.","textarea"]],export:["pdf","docx"]},
+{id:"mistake-analyzer",icon:"🔍",title:"Mistake Analyzer",desc:"Understand mistakes and learn the correct method.",steps:[["subject","Subject","Choose a subject.","select",S6],["question","Question","Enter the original question.","textarea"],["answer","Your answer","Enter your answer.","textarea"],["correct","Correct answer","If known, enter the correct answer.","textarea"]],export:["pdf","docx"]},
 {id:"homework-reminders",icon:"⏰",title:"Homework & Exam Reminders",desc:"Turn tasks and dates into an organized action plan.",steps:[["tasks","Your tasks","List homework and exams with dates.","textarea"],["time","Available time","How much time can you use each day?","options",["30 minutes","1 hour","2 hours","3+ hours"]]],export:["pdf","docx"]},
-{id:"presentation",icon:"📊",title:"Presentation Maker",desc:"Create a classroom-ready presentation with real PPTX export.",steps:[["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"]],["topic","Topic","What should the presentation teach?","text"],["slides","Number of slides","Choose the slide count.","select",["5","7","10","12","15"]],["style","Presentation style","Choose the visual/content approach.","options",["Clean Academic","Interactive Classroom","Exam Review","Storytelling"]]],export:["pptx"]}];
+{id:"presentation",icon:"📊",title:"Presentation Maker",desc:"Create a classroom-ready presentation with real PPTX export.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S8],["topic","Topic","What should the presentation teach?","text"],["slides","Number of slides","Choose the slide count.","select",["5","7","10","12","15"]],["style","Presentation style","Choose the visual/content approach.","options",["Clean Academic","Interactive Classroom","Exam Review","Storytelling"]]],export:["pptx"]}];
 
 const TEACHER_TOOLS=[
-{id:"question-paper",icon:"📋",title:"Question Paper Maker",desc:"Build a balanced exam with marks, duration and difficulty.",steps:[["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"]],["topic","Chapter / topic","What content should be assessed?","text"],["marks","Total marks","Set the total marks.","select",["20","30","40","50","75","100"]],["duration","Exam duration","Choose the exam time.","select",["30 minutes","45 minutes","60 minutes","90 minutes","120 minutes","180 minutes"]],["types","Question types","Select the mix.","options",["MCQ + Short","MCQ + Short + Long","Short + Long","Mixed"]],["difficulty","Difficulty","Choose the difficulty.","options",["Easy","Medium","Hard","Mixed"]]],export:["pdf","docx"]},
-{id:"worksheet",icon:"📑",title:"Worksheet Maker",desc:"Create printable practice material for your class.",steps:[["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["topic","Topic","Enter the topic.","text"],["difficulty","Difficulty","Choose the challenge level.","options",["Easy","Medium","Hard","Mixed"]],["count","Number of questions","Choose the number.","select",["5","10","15","20","25","30"]],["type","Question type","Choose the format.","options",["MCQ","Short Answer","Long Answer","True-False","Mixed"]]],export:["pdf","docx"]},
-{id:"lesson-plan",icon:"🗂️",title:"Lesson Plan Generator",desc:"Plan objectives, instruction, activities and assessment.",steps:[["class","Class","Choose the class.","select",["Nursery","KG","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"]],["topic","Topic","Enter the lesson topic.","text"],["duration","Duration","Choose the lesson duration.","select",["30 minutes","40 minutes","45 minutes","60 minutes","90 minutes"]],["objectives","Learning objectives","What should students be able to do?","textarea"],["approach","Teaching approach","Choose the teaching approach.","options",["Direct Instruction","Inquiry Based","Collaborative","Activity Based","Mixed"]]],export:["pdf","docx"]},
+{id:"question-paper",icon:"📋",title:"Question Paper Maker",desc:"Build a balanced exam with marks, duration and difficulty.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S8],["topic","Chapter / topic","What content should be assessed?","text"],["marks","Total marks","Set the total marks.","select",["20","30","40","50","75","100"]],["duration","Exam duration","Choose the exam time.","select",["30 minutes","45 minutes","60 minutes","90 minutes","120 minutes","180 minutes"]],["types","Question types","Select the mix.","options",["MCQ + Short","MCQ + Short + Long","Short + Long","Mixed"]],["difficulty","Difficulty","Choose the difficulty.","options",["Easy","Medium","Hard","Mixed"]]],export:["pdf","docx"]},
+{id:"worksheet",icon:"📑",title:"Worksheet Maker",desc:"Create printable practice material for your class.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S7],["topic","Topic","Enter the topic.","text"],["difficulty","Difficulty","Choose the challenge level.","options",["Easy","Medium","Hard","Mixed"]],["count","Number of questions","Choose the number.","select",["5","10","15","20","25","30"]],["type","Question type","Choose the format.","options",["MCQ","Short Answer","Long Answer","True-False","Mixed"]]],export:["pdf","docx"]},
+{id:"lesson-plan",icon:"🗂️",title:"Lesson Plan Generator",desc:"Plan objectives, instruction, activities and assessment.",steps:[["class","Class","Choose the class.","select",G14],["subject","Subject","Choose the subject.","select",S8],["topic","Topic","Enter the lesson topic.","text"],["duration","Duration","Choose the lesson duration.","select",["30 minutes","40 minutes","45 minutes","60 minutes","90 minutes"]],["objectives","Learning objectives","What should students be able to do?","textarea"],["approach","Teaching approach","Choose the teaching approach.","options",["Direct Instruction","Inquiry Based","Collaborative","Activity Based","Mixed"]]],export:["pdf","docx"]},
 {id:"answer-checker",icon:"✅",title:"AI Answer Checker",desc:"Evaluate a student's answer and explain what to improve.",steps:[["question","Question","Enter the question.","textarea"],["correct","Expected answer","Enter the model/correct answer.","textarea"],["student","Student answer","Paste the student's answer.","textarea"]],export:[]},
 {id:"class-performance",icon:"📊",title:"Class Performance Analyzer",desc:"Turn scores into class-level insights and priorities.",steps:[["scores","Class scores","Paste names and scores, one per line.","textarea"],["assessment","Assessment","What test or assessment was this?","text"],["goal","Analysis goal","Choose what you need.","options",["Identify Weak Areas","Plan Remediation","Compare Performance","Full Analysis"]]],export:["pdf","docx"]},
-{id:"weak-topic-finder",icon:"🎯",title:"Weak Topic Finder",desc:"Identify topics students struggle with from evidence.",steps:[["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["evidence","Evidence","Describe results, mistakes or common errors.","textarea"],["action","Next action","What should the AI prioritize?","options",["Topics Only","Topics + Reasons","Topics + Remediation"]]],export:["pdf","docx"]},
-{id:"report-card-picture",icon:"🖼️",title:"Report Card — Picture",desc:"Upload a report card image and fill the requested information directly into it.",steps:[["photo","Upload report card","Choose a clear PNG, JPG or WEBP image.","file"],["name","Student Name","Enter the student's name.","text"],["class","Class","Enter the student's class.","text"],["parentsName","Parents Name","Enter the parent's name.","text"],["description","Description","Enter the description if the report card asks for one.","textarea"]],export:["pdf","docx"]},{id:"student-progress",icon:"📈",title:"Student Progress",desc:"Summarize one student's progress over time.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["notes","Progress evidence","Scores, observations, attendance, strengths and concerns.","textarea"],["focus","Focus","Choose the report focus.","options",["Academic Progress","Support Plan","Parent Summary","Full Progress Review"]]],export:["pdf","docx"]},
-{id:"homework-creator",icon:"🏠",title:"Homework Creator",desc:"Create meaningful homework matched to class and topic.",steps:[["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["topic","Topic","Enter the homework topic.","text"],["difficulty","Difficulty","Choose the challenge.","options",["Easy","Medium","Hard","Mixed"]],["count","Number of tasks","How many tasks?","select",["5","10","15","20"]]],export:["pdf","docx"]},
-{id:"student-report",icon:"📄",title:"Student Report Generator",desc:"Create a formal, teacher-ready student report.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["details","Student details","Performance, attendance, behavior, strengths and weaknesses.","textarea"],["tone","Report style","Choose the tone.","options",["Formal","Supportive","Parent Friendly","Detailed"]]],export:["pdf","docx"]},
-{id:"class-activity",icon:"🎨",title:"Class Activity Generator",desc:"Design an engaging activity with objectives and materials.",steps:[["class","Class","Choose the class.","select",["Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]],["subject","Subject","Choose the subject.","select",["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"]],["topic","Topic","Enter the topic.","text"],["duration","Duration","How long is the activity?","select",["10 minutes","20 minutes","30 minutes","45 minutes","60 minutes"]],["style","Activity style","Choose the format.","options",["Individual","Pairs","Groups","Whole Class","Mixed"]]],export:["pdf","docx"]}];
+{id:"weak-topic-finder",icon:"🎯",title:"Weak Topic Finder",desc:"Identify topics students struggle with from evidence.",steps:[["subject","Subject","Choose the subject.","select",S7],["evidence","Evidence","Describe results, mistakes or common errors.","textarea"],["action","Next action","What should the AI prioritize?","options",["Topics Only","Topics + Reasons","Topics + Remediation"]]],export:["pdf","docx"]},
+{id:"report-card-picture",icon:"🖼️",title:"Report Card — Picture",desc:"Upload a report card image and fill the requested information directly into it.",steps:[["photo","Upload report card","Choose a clear PNG, JPG or WEBP image.","file"],["name","Student Name","Enter the student's name.","text"],["class","Class","Enter the student's class.","text"],["parentsName","Parents Name","Enter the parent's name.","text"],["description","Description","Enter the description if the report card asks for one.","textarea"]],export:["pdf","docx"]},
+{id:"student-progress",icon:"📈",title:"Student Progress",desc:"Summarize one student's progress over time.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",G12],["notes","Progress evidence","Scores, observations, attendance, strengths and concerns.","textarea"],["focus","Focus","Choose the report focus.","options",["Academic Progress","Support Plan","Parent Summary","Full Progress Review"]]],export:["pdf","docx"]},
+{id:"homework-creator",icon:"🏠",title:"Homework Creator",desc:"Create meaningful homework matched to class and topic.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S7],["topic","Topic","Enter the homework topic.","text"],["difficulty","Difficulty","Choose the challenge.","options",["Easy","Medium","Hard","Mixed"]],["count","Number of tasks","How many tasks?","select",["5","10","15","20"]]],export:["pdf","docx"]},
+{id:"student-report",icon:"📄",title:"Student Report Generator",desc:"Create a formal, teacher-ready student report.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",G12],["details","Student details","Performance, attendance, behavior, strengths and weaknesses.","textarea"],["tone","Report style","Choose the tone.","options",["Formal","Supportive","Parent Friendly","Detailed"]]],export:["pdf","docx"]},
+{id:"class-activity",icon:"🎨",title:"Class Activity Generator",desc:"Design an engaging activity with objectives and materials.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S7],["topic","Topic","Enter the topic.","text"],["duration","Duration","How long is the activity?","select",["10 minutes","20 minutes","30 minutes","45 minutes","60 minutes"]],["style","Activity style","Choose the format.","options",["Individual","Pairs","Groups","Whole Class","Mixed"]]],export:["pdf","docx"]}];
 
 const PHOTO_TOOL={id:"photo-solver",icon:"📷",title:"Photo Solver",desc:"Upload a question or worksheet image and get a clear solution.",steps:[["photo","Upload a photo","Choose a PNG, JPG or WEBP image.","file"],["question","What should Zenvyra do?","Optional: tell Zenvyra what to focus on.","textarea"]],export:[]};
 
@@ -55,12 +68,23 @@ function escapeHtml(s=""){
 }
 
 function renderMarkdown(text=""){
-    return escapeHtml(text)
+    /* Code fences are pulled out first so their line breaks are preserved */
+    const blocks=[];
+    let s=escapeHtml(text).replace(/```[a-zA-Z0-9_-]*\n?([\s\S]*?)```/g,(_,code)=>{
+        blocks.push(code.replace(/\n$/,""));
+        return `@@CODEBLOCK${blocks.length-1}@@`;
+    });
+
+    s=s
         .replace(/^### (.*)$/gm,"<h4>$1</h4>")
         .replace(/^## (.*)$/gm,"<h3>$1</h3>")
         .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")
+        .replace(/`([^`\n]+)`/g,"<code>$1</code>")
         .replace(/^\s*[-*]\s+(.*)$/gm,"<li>$1</li>")
+        .replace(/(<\/(?:h3|h4|li)>)\n/g,"$1")
         .replace(/\n/g,"<br>");
+
+    return s.replace(/@@CODEBLOCK(\d+)@@/g,(_,i)=>`<pre><code>${blocks[Number(i)]}</code></pre>`);
 }
 
 function profile(){
@@ -72,13 +96,44 @@ function saveProfile(p){
     localStorage.setItem(USER_PROFILE_KEY,JSON.stringify(p));
 }
 
+function storedPicture(){
+    try{return localStorage.getItem(PICTURE_KEY)||""}
+    catch{return ""}
+}
+
+/* Single place that paints name + picture everywhere (top bar, sidebar, settings) */
+function updateProfileUI(){
+    const p=profile();
+    const name=(p&&p.name)||"User";
+
+    ["profileName","sidebarProfileName"].forEach(id=>{
+        const el=$(id);
+        if(el)el.textContent=name;
+    });
+
+    const roleEl=$("sidebarProfileRole");
+    if(roleEl)roleEl.textContent=(p&&p.role)?p.role:"";
+
+    const pic=storedPicture()||DEFAULT_PICTURE;
+
+    ["profilePicture","settingsProfilePicture","sidebarProfilePicture"].forEach(id=>{
+        const el=$(id);
+        if(!el)return;
+        el.onerror=()=>{el.onerror=null;el.src=DEFAULT_PICTURE};
+        el.src=pic;
+    });
+
+    const nameInput=$("settingsName");
+    if(nameInput&&document.activeElement!==nameInput)nameInput.value=name;
+}
+
 function setAuthMessage(msg,error=true){
     $("welcome-message").textContent=msg;
     $("welcome-message").className=error?"auth-message":"auth-message success";
 }
 
 function renderToolCards(){
-    const make=(t)=>`<article class="tool-card"><div class="tool-icon">${t.icon}</div><h3>${t.title}</h3><p>${t.desc}</p><button data-open-tool="${t.id}">Open guided workflow →</button></article>`;
+    const make=(t)=>`<article class="tool-card"><div class="tool-icon">${t.icon}</div><h3>${t.title}</h3><p>${t.desc}</p><button type="button" data-open-tool="${t.id}">Open guided workflow →</button></article>`;
 
     $("studentToolsGrid").innerHTML=STUDENT_TOOLS.map(make).join("");
     $("teacherToolsGrid").innerHTML=TEACHER_TOOLS.map(make).join("");
@@ -88,7 +143,10 @@ function renderToolCards(){
     });
 
     document.querySelectorAll("nav [data-tool]").forEach(b=>{
-        b.onclick=()=>openWizard(b.dataset.tool);
+        b.onclick=()=>{
+            openWizard(b.dataset.tool);
+            if(isMobile())closeSidebar();
+        };
     });
 }
 
@@ -106,6 +164,8 @@ function showTeacherTools(){
     $("studentToolsBtn").classList.remove("active");
 }
 
+let wizardIndex=0;
+
 function openWizard(id,answers={}){
     const t=toolById(id);
     if(!t)return;
@@ -121,8 +181,6 @@ function openWizard(id,answers={}){
     $("wizardModal").hidden=false;
     renderWizardStep();
 }
-
-let wizardIndex=0;
 
 function renderWizardStep(){
     const t=currentTool;
@@ -144,7 +202,7 @@ function renderWizardStep(){
         control=`<textarea id="wizardInput" rows="6" placeholder="Type your answer…"></textarea>`;
     }
     else if(type==="file"){
-        control=`<input id="wizardInput" type="file" accept="${currentTool.id==="photo-solver"||currentTool.id==="report-card-picture"?"image/png,image/jpeg,image/webp":".pdf,.docx,.txt"}"<div id="fileMeta" class="file-meta"></div>`;
+        control=`<input id="wizardInput" type="file" accept="${currentTool.id==="photo-solver"||currentTool.id==="report-card-picture"?"image/png,image/jpeg,image/webp":".pdf,.docx,.txt"}"><div id="fileMeta" class="file-meta"></div>`;
     }
     else{
         control=`<input id="wizardInput" type="text" placeholder="Type your answer…">`;
@@ -256,27 +314,26 @@ async function generateTool(){
     try{
         let result;
 
-        
-if(currentTool.id==="report-card-picture"){
-    const file=currentAnswers.photo;
+        if(currentTool.id==="report-card-picture"){
+            const file=currentAnswers.photo;
 
-    if(!file){
-        throw Error("Please upload a report card image.");
-    }
+            if(!file){
+                throw Error("Please upload a report card image.");
+            }
 
-    const base64=await fileToBase64(file);
-    const h=await authHeaders();
+            const base64=await fileToBase64(file);
+            const h=await authHeaders();
 
-    const r=await fetch(`${API_BASE}/api/vision`,{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json",
-            ...h
-        },
-        body:JSON.stringify({
-            base64Data:base64,
-            mediaType:file.type,
-            prompt:`You are filling a student report card.
+            const r=await fetch(`${API_BASE}/api/vision`,{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json",
+                    ...h
+                },
+                body:JSON.stringify({
+                    base64Data:base64,
+                    mediaType:file.type,
+                    prompt:`You are filling a student report card.
 
 Look carefully at the uploaded report card image and identify the locations of these fields:
 1. Student Name
@@ -307,46 +364,46 @@ Student Name to write: ${currentAnswers.name||""}
 Class to write: ${currentAnswers.class||""}
 Parents Name to write: ${currentAnswers.parentsName||""}
 Description to write: ${currentAnswers.description||""}`
-        })
-    });
+                })
+            });
 
-    const d=await r.json();
+            const d=await r.json();
 
-    if(!d.success){
-        throw Error(d.message||"Could not analyze the report card.");
-    }
+            if(!d.success){
+                throw Error(d.message||"Could not analyze the report card.");
+            }
 
-    let locations;
+            let locations;
 
-    try{
-        locations=JSON.parse(
-            String(d.data.reply)
-                .replace(/```json/g,"")
-                .replace(/```/g,"")
-                .trim()
-        );
-    }catch(e){
-        throw Error("Zenvyra could not detect the report card fields. Please use a clearer image.");
-    }
+            try{
+                locations=JSON.parse(
+                    String(d.data.reply)
+                        .replace(/```json/g,"")
+                        .replace(/```/g,"")
+                        .trim()
+                );
+            }catch(e){
+                throw Error("Zenvyra could not detect the report card fields. Please use a clearer image.");
+            }
 
-    const imageResult=await createFilledReportCard(
-        file,
-        locations.fields||{},
-        {
-            name:currentAnswers.name||"",
-            class:currentAnswers.class||"",
-            parentsName:currentAnswers.parentsName||"",
-            description:currentAnswers.description||""
+            const imageResult=await createFilledReportCard(
+                file,
+                locations.fields||{},
+                {
+                    name:currentAnswers.name||"",
+                    class:currentAnswers.class||"",
+                    parentsName:currentAnswers.parentsName||"",
+                    description:currentAnswers.description||""
+                }
+            );
+
+            result={
+                title:"Completed Report Card",
+                subtitle:"Filled by Zenvyra AI",
+                imageData:imageResult,
+                sections:[]
+            };
         }
-    );
-
-    result={
-        title:"Completed Report Card",
-        subtitle:"Filled by Zenvyra AI",
-        imageData:imageResult,
-        sections:[]
-    };
-}
         else if(currentTool.id==="photo-solver"){
             const file=currentAnswers.photo;
             if(!file)throw Error("Please upload a photo.");
@@ -490,21 +547,21 @@ function showResult(result){
             </section>`
         ).join("")}
         </div>`;
-    
+
     $("resultModal").classList.add("show");
- $("resultModal").hidden=false;
+    $("resultModal").hidden=false;
     $("downloadMenu").hidden=true;
     $("exportStatus").textContent="";
-}
 
-    const allowed = ["pdf", "docx"];
+    /* Export formats (same behaviour as before: PDF + DOCX) */
+    const allowed=["pdf","docx"];
 
     document.querySelectorAll("#downloadMenu [data-format]").forEach(b=>{
         b.style.display=allowed.includes(b.dataset.format)?"block":"none";
     });
 
-    $("downloadBtn").style.display = allowed.length ? "inline-flex" : "none";
-
+    $("downloadBtn").style.display=allowed.length?"inline-flex":"none";
+}
 
 $("resultClose").onclick=()=>{
     $("resultModal").hidden=true;
@@ -602,6 +659,7 @@ function fileToBase64(file){
         r.readAsDataURL(file);
     });
 }
+
 function createFilledReportCard(file, fields, values){
     return new Promise((resolve,reject)=>{
         const img=new Image();
@@ -703,26 +761,22 @@ function createFilledReportCard(file, fields, values){
     });
 }
 
-
-
-    async function askChat(message){
+async function askChat(message){
     const question = String(message || "").trim().toLowerCase();
 
     // Zenvyra identity protection
     if (
         question.includes("who created you") ||
-        
         question.includes("who made you") ||
         question.includes("who is your creator") ||
         question.includes("who is your founder") ||
         question.includes("who built you") ||
         question.includes("who developed you") ||
         question.includes("who owns you")
-        
     ) {
         return "I’m Zenvyra AI, created by Mairaj Ali — Founder & CEO of Zenvyra AI.\n\nI was built with one simple vision: to make learning smarter, simpler, and more enjoyable for everyone.";
     }
-console.log("🔥 NEW ASKCHAT RUNNING:", message);
+
     const h = await authHeaders();
 
     const r = await fetch(`${API_BASE}/api/chat`,{
@@ -784,8 +838,9 @@ console.log("🔥 NEW ASKCHAT RUNNING:", message);
     return reply;
 }
 
-    
-
+/* =========================
+   CHAT HISTORY (storage + logic unchanged; markup restyled)
+   ========================= */
 function sessions(){
     try{
         return JSON.parse(localStorage.getItem(CHAT_SESSIONS_KEY)||"[]");
@@ -798,6 +853,18 @@ function saveSessions(x){
     localStorage.setItem(CHAT_SESSIONS_KEY,JSON.stringify(x));
 }
 
+function historyTime(id){
+    const t=Number(id);
+    if(!Number.isFinite(t)||t<=0)return "";
+    const d=new Date(t);
+    if(isNaN(d.getTime()))return "";
+    const now=new Date();
+    if(d.toDateString()===now.toDateString()){
+        return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+    }
+    return d.toLocaleDateString([],{month:"short",day:"numeric"});
+}
+
 function renderHistory(){
     const list=$("leftSidebarHistory");
 
@@ -806,8 +873,9 @@ function renderHistory(){
     const ss=sessions();
 
     list.innerHTML=ss.map(s=>
-        `<button class="sidebar-history-item ${activeSession?.id===s.id?"active":""}" data-session="${s.id}">
-        🕘 ${escapeHtml(s.title)}
+        `<button type="button" class="sidebar-history-item ${activeSession?.id===s.id?"active":""}" data-session="${s.id}" title="${escapeHtml(s.title)}">
+        <span class="history-title">${escapeHtml(s.title)}</span>
+        <span class="history-time">${escapeHtml(historyTime(s.id))}</span>
         </button>`
     ).join("");
 
@@ -821,6 +889,7 @@ function renderHistory(){
         b.onclick=()=>{
             activeSession=ss.find(s=>s.id===b.dataset.session)||null;
             renderChat();
+            if(isMobile())closeSidebar();
         };
     });
 }
@@ -831,34 +900,28 @@ function renderChat(){
 
     if(!box||!hist)return;
 
+    /* The old single "last answer" box is no longer used; the whole
+       conversation renders as bubbles inside #chat-history. */
+    box.classList.remove("show");
+    box.innerHTML="";
+
     if(!activeSession||!activeSession.messages.length){
-        box.classList.remove("show");
-        box.innerHTML="";
         hist.innerHTML="";
+        renderHistory();
         return;
     }
 
-    const last=activeSession.messages.at(-1);
-
-    box.innerHTML=
-        `<strong>👤 You:</strong> ${escapeHtml(last.q)}
-        <br><br>
-        <strong>✨ Zenvyra:</strong>
-        <div>${renderMarkdown(last.a)}</div>`;
-
-    box.classList.add("show");
-
-    hist.innerHTML=activeSession.messages
-        .slice(0,-1)
-        .reverse()
-        .map(m=>
-            `<div class="history-item">
-            <strong>${escapeHtml(m.q)}</strong>
-            <div>${renderMarkdown(m.a)}</div>
-            </div>`
-        ).join("");
+    hist.innerHTML=activeSession.messages.map(m=>
+        `<div class="msg-row user"><div class="bubble user-bubble">${escapeHtml(m.q).replace(/\n/g,"<br>")}</div></div>
+        <div class="msg-row ai"><div class="bubble ai-bubble">${renderMarkdown(m.a)}</div></div>`
+    ).join("");
 
     renderHistory();
+
+    requestAnimationFrame(()=>{
+        const last=hist.lastElementChild;
+        if(last)last.scrollIntoView({behavior:"smooth",block:"end"});
+    });
 }
 
 $("chatSendBtn").onclick=sendChat;
@@ -914,30 +977,77 @@ async function sendChat(){
 $("newChatBtn").onclick=()=>{
     activeSession=null;
     renderChat();
+    if(isMobile())closeSidebar();
 };
+
+/* Ask AI: jump to the open chat */
+$("navAskAiBtn").onclick=()=>{
+    if(isMobile())closeSidebar();
+    $("chatPanel").scrollIntoView({behavior:"smooth",block:"start"});
+    if(!isMobile()){
+        setTimeout(()=>{$("ai-question").focus({preventScroll:true})},350);
+    }
+};
+
+/* =========================
+   SIDEBAR (single implementation)
+   Desktop (>900px): docked; hamburger collapses/expands it and the
+   layout (shell + search bar) follows via the --sidebar-w CSS variable.
+   Mobile/tablet (<=900px): sidebar is an overlay drawer above the page
+   (z-index above the search bar) with a backdrop.
+   ========================= */
+function isMobile(){return window.innerWidth<=MOBILE_BP}
+
+function openSidebar(){
+    $("sidebar").classList.add("open");
+
+    if(isMobile()){
+        $("sidebarOverlay").classList.add("show");
+        document.body.classList.add("drawer-open");
+    }else{
+        document.body.classList.remove("sidebar-collapsed");
+    }
+}
+
+function closeSidebar(){
+    $("sidebar").classList.remove("open");
+    $("sidebarOverlay").classList.remove("show");
+    document.body.classList.remove("drawer-open");
+}
+
+function toggleSidebar(){
+    if(isMobile()){
+        if($("sidebar").classList.contains("open"))closeSidebar();
+        else openSidebar();
+    }else{
+        document.body.classList.toggle("sidebar-collapsed");
+    }
+}
+
+$("hamburgerBtn").onclick=toggleSidebar;
+$("sidebarCloseBtn").onclick=closeSidebar;
+$("sidebarOverlay").onclick=closeSidebar;
+
+window.addEventListener("resize",()=>{
+    if(!isMobile()){
+        $("sidebarOverlay").classList.remove("show");
+        document.body.classList.remove("drawer-open");
+    }
+});
 
 $("historyToolBtn").onclick=()=>{
     renderHistory();
+    openSidebar();
 
-    const sidebar=$("sidebar");
-    const overlay=$("sidebarOverlay");
     const historyTitle=$("sidebarHistoryTitle");
     const historyList=$("leftSidebarHistory");
-
-    if(sidebar){
-        sidebar.classList.add("open");
-    }
-
-    if(overlay&&window.innerWidth<=800){
-        overlay.classList.add("show");
-    }
 
     if(historyTitle){
         historyTitle.style.display="block";
     }
 
     if(historyList){
-        historyList.style.display="block";
+        historyList.style.display="flex";
 
         setTimeout(()=>{
             historyList.scrollIntoView({
@@ -1178,9 +1288,7 @@ function showDashboard(){
 
     const p=profile();
 
-    if($("profileName")){
-        $("profileName").textContent=p?.name||"User";
-    }
+    updateProfileUI();
 
     if($("topbarGreeting")){
         $("topbarGreeting").textContent=`Welcome back, ${p?.name||"User"}! 👋`;
@@ -1256,7 +1364,8 @@ async function logOut(){
     localStorage.removeItem(LOGGED_IN_KEY);
     localStorage.removeItem(WELCOME_SEEN_KEY);
 
-    $("settingsModal").hidden=true;
+    if($("settingsModal"))$("settingsModal").hidden=true;
+    closeSidebar();
 
     const shell=document.querySelector(".shell");
 
@@ -1271,128 +1380,10 @@ async function logOut(){
 $("studentToolsBtn").onclick=showStudentTools;
 $("teacherToolsBtn").onclick=showTeacherTools;
 
-$("hamburgerBtn").onclick=()=>{
-    $("sidebar").classList.add("open");
-    $("sidebarOverlay").classList.add("show");
-};
-
-$("sidebarCloseBtn").onclick=()=>{
-    $("sidebar").classList.remove("open");
-    $("sidebarOverlay").classList.remove("show");
-};
-
-$("sidebarOverlay").onclick=()=>{
-    $("sidebar").classList.remove("open");
-    $("sidebarOverlay").classList.remove("show");
-};
-
-$("settingsBtn").onclick=()=>{
-    const p=profile()||{};
-
-    $("settingsName").value=p.name||"";
-    $("settingsProfilePicture").src=
-        localStorage.getItem("zenvyra_profile_picture")||"logo.png";
-
-    $("settingsModal").hidden=false;
-};
-
-$("closeSettingsModal").onclick=()=>{
-    $("settingsModal").hidden=true;
-};
-
-$("aboutZenvyraBtn").onclick=()=>{
-    $("aboutModal").hidden=false;
-};
-
-$("closeAboutModal").onclick=()=>{
-    $("aboutModal").hidden=true;
-};
-
-$("saveSettingsBtn").onclick=()=>{
-    const p=profile()||{};
-
-    p.name=$("settingsName").value.trim()||p.name;
-
-    saveProfile(p);
-
-    $("profileName").textContent=p.name||"User";
-    $("topbarGreeting").textContent=`Welcome back, ${p.name||"User"}! 👋`;
-
-    $("settingsSavedMsg").textContent="✓ Settings saved";
-
-    setTimeout(()=>{
-        $("settingsSavedMsg").textContent="";
-    },1800);
-};
-
-document.querySelectorAll(".swatches button").forEach(b=>{
-    b.onclick=()=>{
-        const accent=b.dataset.accent;
-
-        document.documentElement.style.setProperty("--mint",accent);
-        localStorage.setItem("zenvyra_accent",accent);
-
-        document.querySelectorAll(".swatches button").forEach(x=>{
-            x.classList.toggle("active",x===b);
-        });
-    };
-});
-
-$("clearHistoryBtn").onclick=()=>{
-    localStorage.removeItem(CHAT_SESSIONS_KEY);
-    activeSession=null;
-
-    renderHistory();
-    renderChat();
-
-    $("settingsSavedMsg").textContent="✓ Chat history cleared";
-
-    setTimeout(()=>{
-        $("settingsSavedMsg").textContent="";
-    },1800);
-};
-
-$("logoutBtn").onclick=()=>{
-    if(confirm("Log out of Zenvyra AI?")){
-        logOut();
-    }
-};
-
-$("changeProfilePictureBtn").onclick=()=>{
-    $("profilePictureInput").click();
-};
-
-$("profilePictureInput").onchange=()=>{
-    const f=$("profilePictureInput").files[0];
-
-    if(!f)return;
-
-    const r=new FileReader();
-
-    r.onload=()=>{
-        localStorage.setItem("zenvyra_profile_picture",r.result);
-
-        $("settingsProfilePicture").src=r.result;
-
-        if($("profilePicture")){
-            $("profilePicture").src=r.result;
-        }
-    };
-
-    r.readAsDataURL(f);
-};
-
-$("removeProfilePictureBtn").onclick=()=>{
-    localStorage.removeItem("zenvyra_profile_picture");
-
-    $("settingsProfilePicture").src="logo.png";
-
-    if($("profilePicture")){
-        $("profilePicture").src="logo.png";
-    }
-};
-
+/* Backdrop click closes modals (Settings has its own handler below) */
 document.querySelectorAll(".modal").forEach(m=>{
+    if(m.id==="settingsModal")return;
+
     m.addEventListener("click",e=>{
         if(e.target===m&&!generating){
             m.hidden=true;
@@ -1400,11 +1391,305 @@ document.querySelectorAll(".modal").forEach(m=>{
     });
 });
 
-const accent=localStorage.getItem("zenvyra_accent");
+/* =========================
+   ABOUT ZENVYRA
+   ========================= */
+(function initAbout(){
+    const modal=$("aboutModal");
+    const openBtn=$("aboutZenvyraBtn");
+    const closeBtn=$("closeAboutModal");
 
-if(accent){
-    document.documentElement.style.setProperty("--mint",accent);
-}
+    if(openBtn&&modal){
+        openBtn.onclick=()=>{
+            if(isMobile())closeSidebar();
+            modal.hidden=false;
+            const card=modal.querySelector(".small-modal");
+            if(card)card.scrollTop=0;
+        };
+    }
+
+    if(closeBtn&&modal){
+        closeBtn.onclick=()=>{modal.hidden=true};
+    }
+})();
+
+/* =========================
+   SETTINGS — ONE authoritative implementation
+   settingsBtn, profile, appearance, accent, save, picture, logout
+   ========================= */
+(function initSettings(){
+    const root=document.documentElement;
+    const modal=$("settingsModal");
+    const darkQuery=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;
+
+    const themeButtons=document.querySelectorAll(".appearance-option");
+    const accentButtons=document.querySelectorAll(".accent-option");
+
+    function readStore(key,fallback){
+        try{return localStorage.getItem(key)||fallback}
+        catch{return fallback}
+    }
+
+    function writeStore(key,value){
+        try{localStorage.setItem(key,value);return true}
+        catch(e){console.error("Could not save",key,e);return false}
+    }
+
+    let savedTheme=readStore(THEME_KEY,"system");
+    let savedAccent=readStore(ACCENT_KEY,DEFAULT_ACCENT);
+    if(!["light","dark","system"].includes(savedTheme))savedTheme="system";
+    if(!/^#[0-9a-f]{6}$/i.test(savedAccent))savedAccent=DEFAULT_ACCENT;
+
+    let selectedTheme=savedTheme;
+    let selectedAccent=savedAccent;
+
+    function applyTheme(theme){
+        const resolved=theme==="system"
+            ?(darkQuery&&darkQuery.matches?"dark":"light")
+            :theme;
+
+        root.classList.toggle("dark-mode",resolved==="dark");
+        root.setAttribute("data-theme",resolved);
+        root.style.colorScheme=resolved;
+    }
+
+    function textOn(color){
+        const m=/^#?([0-9a-f]{6})$/i.exec(String(color).trim());
+        if(!m)return "#123b3a";
+        const n=parseInt(m[1],16);
+        const lum=(0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255))/255;
+        return lum>0.6?"#123b3a":"#ffffff";
+    }
+
+    function applyAccent(color){
+        root.style.setProperty("--accent",color);
+        root.style.setProperty("--mint",color);
+        root.style.setProperty("--on-accent",textOn(color));
+    }
+
+    function markSelected(){
+        themeButtons.forEach(b=>{
+            const on=b.dataset.theme===selectedTheme;
+            b.classList.toggle("selected",on);
+            b.classList.toggle("active",on);
+            b.setAttribute("aria-pressed",on?"true":"false");
+        });
+
+        accentButtons.forEach(b=>{
+            const on=b.dataset.accent===selectedAccent;
+            b.classList.toggle("selected",on);
+            b.setAttribute("aria-pressed",on?"true":"false");
+        });
+    }
+
+    themeButtons.forEach(b=>{
+        b.onclick=()=>{
+            selectedTheme=b.dataset.theme;
+            applyTheme(selectedTheme);
+            markSelected();
+        };
+    });
+
+    accentButtons.forEach(b=>{
+        b.onclick=()=>{
+            selectedAccent=b.dataset.accent;
+            applyAccent(selectedAccent);
+            markSelected();
+        };
+    });
+
+    if(darkQuery){
+        const onChange=()=>{
+            const active=modal&&!modal.hidden?selectedTheme:savedTheme;
+            if(active==="system")applyTheme("system");
+        };
+        if(darkQuery.addEventListener)darkQuery.addEventListener("change",onChange);
+        else if(darkQuery.addListener)darkQuery.addListener(onChange);
+    }
+
+    function showMsg(text,ms=2800){
+        const msg=$("settingsSavedMsg");
+        if(!msg)return;
+        msg.textContent=text;
+        if(ms){
+            setTimeout(()=>{if(msg.textContent===text)msg.textContent=""},ms);
+        }
+    }
+
+    /* Open / close */
+    function openSettings(){
+        if(!modal)return;
+        if(isMobile())closeSidebar();
+        selectedTheme=savedTheme;
+        selectedAccent=savedAccent;
+        markSelected();
+        updateProfileUI();
+        const nameInput=$("settingsName");
+        if(nameInput){
+            const p=profile();
+            nameInput.value=(p&&p.name)||"";
+        }
+        const msg=$("settingsSavedMsg");
+        if(msg)msg.textContent="";
+        modal.hidden=false;
+        const card=modal.querySelector(".small-modal");
+        if(card)card.scrollTop=0;
+    }
+
+    function closeSettings(){
+        if(!modal)return;
+        /* discard unsaved appearance previews */
+        selectedTheme=savedTheme;
+        selectedAccent=savedAccent;
+        applyTheme(savedTheme);
+        applyAccent(savedAccent);
+        markSelected();
+        modal.hidden=true;
+    }
+
+    ["settingsBtn","profileBadge","sidebarProfile"].forEach(id=>{
+        const el=$(id);
+        if(el)el.onclick=openSettings;
+    });
+
+    const closeBtn=$("closeSettingsModal");
+    if(closeBtn)closeBtn.onclick=closeSettings;
+
+    if(modal){
+        modal.addEventListener("click",e=>{
+            if(e.target===modal)closeSettings();
+        });
+    }
+
+    /* Escape closes Settings, About and the drawer */
+    document.addEventListener("keydown",e=>{
+        if(e.key!=="Escape")return;
+        if(modal&&!modal.hidden){closeSettings();return}
+        const about=$("aboutModal");
+        if(about&&!about.hidden){about.hidden=true;return}
+        if($("sidebar").classList.contains("open")&&isMobile())closeSidebar();
+    });
+
+    /* Save settings: appearance, accent, display name (picture is saved on change) */
+    const saveBtn=$("saveSettingsBtn");
+    if(saveBtn){
+        saveBtn.onclick=()=>{
+            const ok=writeStore(THEME_KEY,selectedTheme)&&writeStore(ACCENT_KEY,selectedAccent);
+            savedTheme=selectedTheme;
+            savedAccent=selectedAccent;
+            applyTheme(savedTheme);
+            applyAccent(savedAccent);
+            markSelected();
+
+            /* Display name (existing profile store; also synced to Supabase metadata) */
+            const nameInput=$("settingsName");
+            const p=profile();
+            if(nameInput&&p){
+                const newName=nameInput.value.trim();
+                if(newName&&newName!==p.name){
+                    saveProfile({...p,name:newName});
+                    const greeting=$("topbarGreeting");
+                    if(greeting)greeting.textContent=`Welcome back, ${newName}! 👋`;
+                    Promise.resolve(supabaseClient.auth.updateUser({data:{name:newName}})).catch(()=>{});
+                }
+            }
+            updateProfileUI();
+
+            showMsg(ok?"Settings saved successfully ✓":"Could not save settings in this browser.");
+        };
+    }
+
+    /* Profile picture */
+    function shrinkImage(file){
+        return new Promise((resolve,reject)=>{
+            const reader=new FileReader();
+            reader.onerror=reject;
+            reader.onload=()=>{
+                const img=new Image();
+                img.onerror=reject;
+                img.onload=()=>{
+                    const size=256;
+                    const scale=Math.min(1,size/Math.max(img.width,img.height));
+                    const canvas=document.createElement("canvas");
+                    canvas.width=Math.max(1,Math.round(img.width*scale));
+                    canvas.height=Math.max(1,Math.round(img.height*scale));
+                    canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+                    resolve(canvas.toDataURL("image/jpeg",0.85));
+                };
+                img.src=reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    const picInput=$("profilePictureInput");
+    const changeBtn=$("changeProfilePictureBtn");
+    const removeBtn=$("removeProfilePictureBtn");
+
+    if(changeBtn&&picInput){
+        changeBtn.onclick=()=>picInput.click();
+    }
+
+    if(picInput){
+        picInput.onchange=async()=>{
+            const file=picInput.files&&picInput.files[0];
+            if(!file)return;
+
+            if(!file.type.startsWith("image/")){
+                showMsg("Please select an image file.");
+                picInput.value="";
+                return;
+            }
+
+            try{
+                const src=await shrinkImage(file);
+                const saved=writeStore(PICTURE_KEY,src);
+                /* show immediately, even if storage failed */
+                ["profilePicture","settingsProfilePicture","sidebarProfilePicture"].forEach(id=>{
+                    const el=$(id);
+                    if(el)el.src=src;
+                });
+                showMsg(saved?"Profile picture updated ✓":"Picture shown now, but could not be saved for next time.");
+            }catch(e){
+                console.error(e);
+                showMsg("Could not read that image. Please try another one.");
+            }
+
+            picInput.value="";
+        };
+    }
+
+    if(removeBtn){
+        removeBtn.onclick=()=>{
+            try{localStorage.removeItem(PICTURE_KEY)}catch{}
+            if(picInput)picInput.value="";
+            updateProfileUI();
+            showMsg("Profile picture removed ✓");
+        };
+    }
+
+    /* Clear chat history */
+    const clearBtn=$("clearHistoryBtn");
+    if(clearBtn){
+        clearBtn.onclick=()=>{
+            if(!confirm("Clear all saved chat history on this device? This cannot be undone."))return;
+            try{localStorage.removeItem(CHAT_SESSIONS_KEY)}catch{}
+            activeSession=null;
+            renderChat();
+            showMsg("Chat history cleared ✓");
+        };
+    }
+
+    /* Logout (existing Supabase logOut()) */
+    const logoutBtn=$("logoutBtn");
+    if(logoutBtn)logoutBtn.onclick=logOut;
+
+    /* Load saved appearance + picture */
+    applyTheme(savedTheme);
+    applyAccent(savedAccent);
+    markSelected();
+    updateProfileUI();
+})();
 
 renderToolCards();
 renderHistory();

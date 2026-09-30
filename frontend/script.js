@@ -92,18 +92,36 @@ function renderToolCards(){
     });
 }
 
-function showStudentTools(){
-    $("studentCardsSection").hidden=false;
-    $("teacherCardsSection").hidden=true;
-    $("studentToolsBtn").classList.add("active");
-    $("teacherToolsBtn").classList.remove("active");
+function showStudentTools() {
+    const student = document.getElementById("studentCardsSection");
+    const teacher = document.getElementById("teacherCardsSection");
+
+    if (!student || !teacher) return;
+
+    student.hidden = false;
+    teacher.hidden = true;
+
+    student.style.setProperty("display", "block", "important");
+    teacher.style.setProperty("display", "none", "important");
+
+    document.getElementById("studentToolsBtn")?.classList.add("active");
+    document.getElementById("teacherToolsBtn")?.classList.remove("active");
 }
 
-function showTeacherTools(){
-    $("studentCardsSection").hidden=true;
-    $("teacherCardsSection").hidden=false;
-    $("teacherToolsBtn").classList.add("active");
-    $("studentToolsBtn").classList.remove("active");
+function showTeacherTools() {
+    const student = document.getElementById("studentCardsSection");
+    const teacher = document.getElementById("teacherCardsSection");
+
+    if (!student || !teacher) return;
+
+    student.hidden = true;
+    teacher.hidden = false;
+
+    student.style.setProperty("display", "none", "important");
+    teacher.style.setProperty("display", "block", "important");
+
+    document.getElementById("teacherToolsBtn")?.classList.add("active");
+    document.getElementById("studentToolsBtn")?.classList.remove("active");
 }
 
 function openWizard(id,answers={}){
@@ -788,6 +806,7 @@ console.log("🔥 NEW ASKCHAT RUNNING:", message);
 
 function sessions(){
     try{
+        console.log("Zenvyra saved sessions:", localStorage.getItem(CHAT_SESSIONS_KEY));
         return JSON.parse(localStorage.getItem(CHAT_SESSIONS_KEY)||"[]");
     }catch{
         return [];
@@ -799,68 +818,117 @@ function saveSessions(x){
 }
 
 function renderHistory(){
-    const list=$("leftSidebarHistory");
+    const list = document.getElementById("leftSidebarHistory");
+    const title = document.getElementById("sidebarHistoryTitle");
 
-    if(!list)return;
+    if(!list) return;
 
-    const ss=sessions();
+    const ss = sessions();
 
-    list.innerHTML=ss.map(s=>
-        `<button class="sidebar-history-item ${activeSession?.id===s.id?"active":""}" data-session="${s.id}">
-        🕘 ${escapeHtml(s.title)}
-        </button>`
-    ).join("");
-
-    const title=$("sidebarHistoryTitle");
+    // Always make history area visible when chats exist
+    list.style.display = ss.length ? "block" : "none";
 
     if(title){
-        title.style.display=ss.length?"block":"none";
+        title.style.display = ss.length ? "block" : "none";
     }
 
-    list.querySelectorAll("[data-session]").forEach(b=>{
-        b.onclick=()=>{
-            activeSession=ss.find(s=>s.id===b.dataset.session)||null;
+    list.innerHTML = "";
+
+    ss.forEach(s => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "sidebar-history-item";
+        button.dataset.session = s.id;
+        button.textContent = "🕘 " + (s.title || "New chat");
+
+        if(activeSession && activeSession.id === s.id){
+            button.classList.add("active");
+        }
+
+        button.addEventListener("click", () => {
+            activeSession = ss.find(x => x.id === s.id) || null;
+
             renderChat();
-        };
+
+            // Keep sidebar open
+            const sidebar = document.getElementById("sidebar");
+            if(sidebar){
+                sidebar.classList.add("open");
+            }
+
+            renderHistory();
+        });
+
+        list.appendChild(button);
     });
 }
 
 function renderChat(){
-    const box=$("ai-response");
-    const hist=$("chat-history");
 
-    if(!box||!hist)return;
+    const box = $("ai-response");
+    const hist = $("chat-history");
 
-    if(!activeSession||!activeSession.messages.length){
+    if(!box || !hist) return;
+
+    if(!activeSession || !activeSession.messages.length){
+
         box.classList.remove("show");
         box.innerHTML="";
         hist.innerHTML="";
+
         return;
     }
 
-    const last=activeSession.messages.at(-1);
+    /* ===== CURRENT CHAT ===== */
 
-    box.innerHTML=
-        `<strong>👤 You:</strong> ${escapeHtml(last.q)}
-        <br><br>
-        <strong>✨ Zenvyra:</strong>
-        <div>${renderMarkdown(last.a)}</div>`;
+    const last = activeSession.messages.at(-1);
+
+    box.innerHTML = `
+        <div class="chat-message user-bubble">
+            <div class="chat-bubble-text">
+                ${escapeHtml(last.q)}
+            </div>
+        </div>
+
+        <div class="chat-message ai-bubble">
+            <div class="chat-bubble-name">✨ Zenvyra</div>
+            <div class="chat-bubble-text">
+                ${renderMarkdown(last.a)}
+            </div>
+        </div>
+    `;
 
     box.classList.add("show");
 
-    hist.innerHTML=activeSession.messages
+
+    /* ===== OLD CHAT HISTORY ===== */
+
+    hist.innerHTML = activeSession.messages
         .slice(0,-1)
         .reverse()
-        .map(m=>
-            `<div class="history-item">
-            <strong>${escapeHtml(m.q)}</strong>
-            <div>${renderMarkdown(m.a)}</div>
-            </div>`
-        ).join("");
+        .map(m => `
+            <div class="history-item">
+
+                <div class="chat-message user-bubble">
+                    <div class="chat-bubble-text">
+                        ${escapeHtml(m.q)}
+                    </div>
+                </div>
+
+                <div class="chat-message ai-bubble">
+                    <div class="chat-bubble-name">✨ Zenvyra</div>
+                    <div class="chat-bubble-text">
+                        ${renderMarkdown(m.a)}
+                    </div>
+                </div>
+
+            </div>
+        `)
+        .join("");
 
     renderHistory();
 }
-
 $("chatSendBtn").onclick=sendChat;
 
 $("ai-question").addEventListener("keydown",e=>{
@@ -1210,6 +1278,18 @@ async function restore(){
             };
 
             saveProfile(p);
+            const savedPic = localStorage.getItem("zenvyra_profile_picture");
+
+const dashboardPic = document.getElementById("profilePicture");
+const dashboardName = document.getElementById("profileName");
+
+if (dashboardPic && savedPic) {
+    dashboardPic.src = savedPic;
+}
+
+if (dashboardName) {
+    dashboardName.textContent = p.name || "User";
+}
 
             localStorage.setItem(LOGGED_IN_KEY,"true");
 
@@ -1287,15 +1367,24 @@ $("sidebarOverlay").onclick=()=>{
 };
 
 $("settingsBtn").onclick=()=>{
+    $("settingsModal").hidden=false;
+
     const p=profile()||{};
 
     $("settingsName").value=p.name||"";
     $("settingsProfilePicture").src=
-        localStorage.getItem("zenvyra_profile_picture")||"logo.png";
-
-    $("settingsModal").hidden=false;
+        p.picture||localStorage.getItem("zenvyra_profile_picture")||"logo.png";
 };
 
+$("profileBadge").onclick=()=>{
+    $("settingsModal").hidden=false;
+
+    const p=profile()||{};
+
+    $("settingsName").value=p.name||"";
+    $("settingsProfilePicture").src=
+        p.picture||localStorage.getItem("zenvyra_profile_picture")||"logo.png";
+};
 $("closeSettingsModal").onclick=()=>{
     $("settingsModal").hidden=true;
 };
@@ -1308,15 +1397,32 @@ $("closeAboutModal").onclick=()=>{
     $("aboutModal").hidden=true;
 };
 
-$("saveSettingsBtn").onclick=()=>{
+
+$("saveSettingsBtn").onclick=async ()=>{
     const p=profile()||{};
 
-    p.name=$("settingsName").value.trim()||p.name;
+    p.name=$("settingsName").value.trim()||p.name||"User";
 
+    // Save locally
     saveProfile(p);
 
-    $("profileName").textContent=p.name||"User";
-    $("topbarGreeting").textContent=`Welcome back, ${p.name||"User"}! 👋`;
+    // Save name to Supabase so refresh keeps the new name
+    try{
+        const {error}=await supabaseClient.auth.updateUser({
+            data:{
+                name:p.name
+            }
+        });
+
+        if(error){
+            console.error("Profile name update error:",error);
+        }
+    }catch(e){
+        console.error("Profile name update error:",e);
+    }
+
+    $("profileName").textContent=p.name;
+    $("topbarGreeting").textContent=`Welcome back, ${p.name}! 👋`;
 
     $("settingsSavedMsg").textContent="✓ Settings saved";
 
@@ -1409,3 +1515,50 @@ if(accent){
 renderToolCards();
 renderHistory();
 restore();
+
+/* ===== CHAT / DASHBOARD MODE ===== */
+
+const dashboardBtn = document.getElementById("dashboardBtn");
+const navAskAiBtn = document.getElementById("navAskAiBtn");
+const shell = document.querySelector(".shell");
+
+function openChatMode() {
+    if (!shell) return;
+
+    shell.classList.add("chat-mode");
+
+    const chatPanel = document.getElementById("chatPanel");
+
+    if (chatPanel) {
+        chatPanel.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+}
+
+function openDashboardMode() {
+    if (!shell) return;
+
+    shell.classList.remove("chat-mode");
+
+    const dashboard = document.getElementById("dashboard");
+
+    if (dashboard) {
+        dashboard.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+}
+
+if (navAskAiBtn) {
+    navAskAiBtn.addEventListener("click", openChatMode);
+}
+
+if (dashboardBtn) {
+    dashboardBtn.addEventListener("click", openDashboardMode);
+}
+document.addEventListener("DOMContentLoaded", () => {
+    renderHistory();
+});

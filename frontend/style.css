@@ -197,3 +197,578 @@ nav{display:grid;gap:5px}nav button,.sidebar-bottom button{border:0;background:t
         display:block;
     }
 }
+/* ===== ZENVYRA SIDEBAR — TODAY'S UI ===== */
+
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+#sidebar .brand {
+  flex-shrink: 0;
+}
+
+#sidebar .new-chat {
+  margin: 14px 16px;
+  flex-shrink: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0 12px;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sidebar-section .side-label {
+  padding: 0 12px;
+  margin-bottom: 4px;
+}
+
+.sidebar-nav-btn {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition:
+    background .18s ease,
+    transform .18s ease;
+}
+
+.sidebar-nav-btn:hover {
+  background: rgba(47, 143, 131, .10);
+}
+
+.sidebar-nav-btn:active {
+  transform: scale(.98);
+}
+
+.sidebar-nav-btn.active {
+  background: rgba(47, 143, 131, .15);
+}
+
+#leftSidebarHistory {
+  padding: 4px 12px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+/* ===== ZENVYRA CHAT — WHATSAPP STYLE ===== */
+
+#chatPanel {
+  width: 100%;
+}
+
+#chat-history,
+#ai-response {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Chat messages */
+#chat-history > *,
+#ai-response > * {
+  max-width: min(78%, 680px);
+  padding: 11px 15px;
+  border-radius: 18px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* User side — RIGHT */
+#chat-history .user,
+#chat-history .user-message,
+#chat-history .message-user,
+#chat-history [data-role="user"] {
+  align-self: flex-end;
+  background: #2F8F83;
+  color: white;
+  border-radius: 18px 18px 5px 18px;
+}
+
+/* Zenvyra side — LEFT */
+#chat-history .assistant,
+#chat-history .assistant-message,
+#chat-history .ai-message,
+#chat-history .message-ai,
+#ai-response {
+  align-self: flex-start;
+  background: #F1F5F4;
+  color: #173f3a;
+  border-radius: 18px 18px 18px 5px;
+}
+
+/* Chat input */
+#chatPanel .chat-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 8px 10px;
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid #D9F3EC;
+}
+
+#chatPanel #ai-question {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 10px 6px;
+  font: inherit;
+}
+
+#chatPanel #chatSendBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== CHAT MODE ===== */
+
+.shell.chat-mode #studentCardsSection,
+.shell.chat-mode #teacherCardsSection {
+  display: none;
+}
+
+.shell.chat-mode .hero {
+  display: none;
+}
+
+.shell.chat-mode #chatPanel {
+  margin-top: 0;
+}
+/* =================================
+   DASHBOARD ↔ CHAT MODE
+================================= */
+
+/* Normal dashboard */
+#dashboard {
+    width: 100%;
+}
+
+/* CHAT MODE */
+.shell.chat-mode #studentCardsSection,
+.shell.chat-mode #teacherCardsSection {
+    display: none !important;
+}
+
+.shell.chat-mode .hero {
+    display: none !important;
+}
+
+/* Make chat large */
+.shell.chat-mode #chatPanel {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: 70vh;
+}
+
+/* Bigger chat messages area */
+.shell.chat-mode #chat-history,
+.shell.chat-mode #ai-response {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* More space for conversation */
+.shell.chat-mode #ai-response {
+    min-height: 55vh;
+    padding: 24px 12px;
+}
+
+/* Bigger chat input */
+.shell.chat-mode .chat-input {
+    width: 100%;
+    min-height: 58px;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+
+    .shell.chat-mode #chatPanel {
+        min-height: 75vh;
+    }
+
+    .shell.chat-mode #ai-response {
+        min-height: 60vh;
+        padding: 16px 6px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #chat-history > *,
+  #ai-response > * {
+    max-width: 88%;
+  }
+}
+/* =================================
+   ZENVYRA WHATSAPP CHAT
+================================= */
+
+#ai-response {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    padding: 18px 8px;
+}
+
+/* Every message */
+#ai-response .chat-message {
+    display: block;
+    width: fit-content;
+    max-width: 75%;
+    padding: 11px 15px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+/* YOU — RIGHT */
+#ai-response .user-bubble {
+    align-self: flex-end;
+    background: #2F8F83;
+    color: #ffffff;
+    border-radius: 18px 18px 4px 18px;
+}
+
+/* ZENVYRA — LEFT */
+#ai-response .ai-bubble {
+    align-self: flex-start;
+    background: #F1F5F4;
+    color: #173f3a;
+    border-radius: 18px 18px 18px 4px;
+}
+
+/* Zenvyra name */
+#ai-response .chat-bubble-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    opacity: .75;
+}
+
+/* Text */
+#ai-response .chat-bubble-text {
+    margin: 0;
+}
+
+/* Markdown headings inside AI bubble */
+#ai-response .chat-bubble-text h3,
+#ai-response .chat-bubble-text h4 {
+    margin: 6px 0;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+    #ai-response {
+        padding: 12px 4px;
+        gap: 9px;
+    }
+
+    #ai-response .chat-message {
+        max-width: 88%;
+        padding: 10px 13px;
+    }
+}
+/* ===== BIG CHAT MODE ===== */
+
+.shell.chat-mode #chatPanel {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.shell.chat-mode #ai-response {
+    min-height: 55vh;
+    width: 100%;
+}
+
+.shell.chat-mode .chat-input {
+    width: 100%;
+}
+/* BIG CHAT */
+.shell.chat-mode #chatPanel {
+    width: 100%;
+    max-width: 1100px;
+}
+
+.shell.chat-mode #ai-response {
+    min-height: 55vh;
+}
+/* =========================================
+   ZENVYRA FINAL CHAT / DASHBOARD MODE
+========================================= */
+
+/* CHAT MODE = only big chat */
+.shell.chat-mode .hero,
+.shell.chat-mode #studentCardsSection,
+.shell.chat-mode #teacherCardsSection {
+    display: none !important;
+}
+
+/* Big chat panel */
+.shell.chat-mode #chatPanel {
+    display: block !important;
+    width: 100% !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+}
+
+/* Big conversation area */
+.shell.chat-mode #ai-response {
+    width: 100% !important;
+    min-height: 55vh !important;
+}
+
+/* DASHBOARD MODE = buttons come back */
+.shell:not(.chat-mode) #studentCardsSection {
+    display: block !important;
+}
+
+/* ===== MODE VISIBILITY ===== */
+
+/* Chat mode */
+.shell.chat-mode #studentCardsSection,
+.shell.chat-mode #teacherCardsSection,
+.shell.chat-mode .hero {
+    display: none !important;
+}
+
+/* Teacher section: hidden attribute must work */
+#teacherCardsSection[hidden] {
+    display: none !important;
+}
+/* Fix Student / Teacher tools switching */
+#studentCardsSection[hidden],
+#teacherCardsSection[hidden] {
+    display: none !important;
+}
+/* ===== CLEAN CHAT HISTORY ===== */
+
+#historyToolBtn {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 13px;
+    margin: 0 !important;
+    transform: none !important;
+    position: static !important;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.sidebar-section:has(#historyToolBtn) {
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 4px !important;
+    transform: none !important;
+}
+
+#sidebarHistoryTitle {
+    display: block;
+    position: static !important;
+    margin: 6px 10px 4px !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1.3;
+}
+
+#leftSidebarHistory {
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    max-height: 220px !important;
+    overflow-y: auto !important;
+}
+
+#leftSidebarHistory .sidebar-history-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    min-height: 38px;
+    padding: 9px 10px !important;
+    margin: 0 0 4px !important;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #50716c;
+    text-align: left;
+    font-size: 13px !important;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+#leftSidebarHistory .sidebar-history-item:hover,
+#leftSidebarHistory .sidebar-history-item.active {
+    background: var(--ice);
+}
+/* ===== CHAT HISTORY — MOVE UP & SHOW ===== */
+
+#historyToolBtn {
+    margin: 0 !important;
+}
+
+#sidebarHistoryTitle {
+    position: static !important;
+    display: block !important;
+    margin: 6px 12px 4px !important;
+    padding: 0 !important;
+    line-height: 1.3 !important;
+}
+
+#leftSidebarHistory {
+    position: static !important;
+    display: block !important;
+    margin: 0 12px !important;
+    padding: 0 !important;
+    max-height: 220px !important;
+    overflow-y: auto !important;
+}
+
+#leftSidebarHistory .sidebar-history-item {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 4px !important;
+    padding: 8px 10px !important;
+    text-align: left !important;
+}
+/* FINAL: CHAT HISTORY POSITION */
+#sidebar {
+    overflow-y: auto !important;
+}
+
+#sidebarHistoryTitle {
+    display: block !important;
+    position: static !important;
+    margin: 8px 12px 4px !important;
+    padding: 0 !important;
+}
+
+#leftSidebarHistory {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    position: static !important;
+    margin: 0 12px !important;
+    padding: 0 !important;
+    max-height: 220px !important;
+    overflow-y: auto !important;
+}
+
+#leftSidebarHistory .sidebar-history-item {
+    display: block !important;
+    width: 100% !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    text-align: left !important;
+}
+/* Sidebar must stay above chat/search area */
+#sidebar {
+    z-index: 1000 !important;
+}
+
+#sidebarOverlay {
+    z-index: 999 !important;
+}
+
+.shell {
+    position: relative;
+    z-index: 1 !important;
+}
+/* ===== MOBILE TOOL CARDS — 2 COLUMNS ===== */
+@media (max-width: 800px) {
+  .tool-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .tool-card {
+    min-width: 0 !important;
+  }
+}
+/* ===== PROFILE — MOBILE & DESKTOP ===== */
+
+#profilePicture {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+#profileName {
+    display: inline !important;
+    white-space: nowrap !important;
+}
+
+.profile {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+@media (max-width: 800px) {
+    #profileName {
+        display: none !important;
+    }
+
+    #profilePicture {
+        width: 38px !important;
+        height: 38px !important;
+    }
+}
+@media (max-width: 800px) {
+    #profileName {
+        display: none !important;
+    }
+}
+@media (max-width: 800px) {
+    #profileName {
+        display: inline !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    .profile {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+}
