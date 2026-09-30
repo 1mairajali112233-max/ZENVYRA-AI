@@ -442,3 +442,180 @@ button.accent-option.selected{border-color:var(--text);background:var(--pale)}
   .hero h2{font-size:23px}
   .bubble{max-width:94%}
 }
+
+/* =========================================================
+   ZENVYRA — MOBILE DASHBOARD
+   Keeps the desktop design, adapts it for phones
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    /* Main page */
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* App container */
+    .app,
+    .app-container,
+    .dashboard,
+    .main-layout {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    /* Sidebar */
+    #leftSidebar,
+    .sidebar,
+    .left-sidebar {
+        width: min(82vw, 320px);
+        max-width: 320px;
+    }
+
+    /* Main content */
+    .main-content,
+    .content,
+    .dashboard-content,
+    .chat-container {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    /* Dashboard header */
+    .dashboard-header,
+    .topbar,
+    .header {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Dashboard cards */
+    .tools-grid,
+    .tool-grid,
+    .dashboard-grid,
+    .cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Cards */
+    .tool-card,
+    .dashboard-card,
+    .feature-card {
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Long text */
+    .tool-card h3,
+    .tool-card p,
+    .dashboard-card h3,
+    .dashboard-card p {
+        overflow-wrap: anywhere;
+    }
+
+    /* Search */
+    input,
+    textarea,
+    select {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Chat */
+    .chat-area,
+    .messages,
+    #chatMessages {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    /* Message input */
+    .chat-input-container,
+    .input-area,
+    .message-input-area {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Modals */
+    .modal,
+    .modal-content,
+    .settings-modal,
+    .wizard-modal,
+    .result-modal {
+        max-width: calc(100vw - 24px);
+        box-sizing: border-box;
+    }
+
+    /* Settings */
+    .settings-content {
+        width: 100%;
+        max-width: calc(100vw - 24px);
+        max-height: 90vh;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+
+    /* Touch-friendly buttons */
+    button {
+        min-height: 42px;
+    }
+}
+
+/* Smaller phones */
+@media (max-width: 480px) {
+
+    /* Keep dashboard cards clean */
+    .tools-grid,
+    .tool-grid,
+    .dashboard-grid,
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Dashboard spacing */
+    .main-content,
+    .dashboard-content {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    /* Header */
+    .dashboard-header,
+    .topbar,
+    .header {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    /* Cards */
+    .tool-card,
+    .dashboard-card,
+    .feature-card {
+        padding: 16px;
+    }
+
+    /* Modals */
+    .modal,
+    .modal-content,
+    .settings-modal,
+    .wizard-modal,
+    .result-modal {
+        width: calc(100vw - 20px);
+        max-width: calc(100vw - 20px);
+        margin: 10px;
+    }
+}
+
