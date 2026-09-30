@@ -574,16 +574,35 @@ button.accent-option.selected{border-color:var(--text);background:var(--pale)}
     }
 }
 
-/* Smaller phones */
 @media (max-width: 480px) {
 
-    /* Keep dashboard cards clean */
     .tools-grid,
     .tool-grid,
     .dashboard-grid,
     .cards-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
     }
+
+    .tool-card,
+    .dashboard-card,
+    .feature-card {
+        min-width: 0;
+        padding: 12px;
+    }
+
+    .tool-card h3,
+    .dashboard-card h3,
+    .feature-card h3 {
+        font-size: 14px;
+    }
+
+    .tool-card p,
+    .dashboard-card p,
+    .feature-card p {
+        font-size: 12px;
+    }
+}
 
     /* Dashboard spacing */
     .main-content,
@@ -617,5 +636,5 @@ button.accent-option.selected{border-color:var(--text);background:var(--pale)}
         max-width: calc(100vw - 20px);
         margin: 10px;
     }
-}
+
 
