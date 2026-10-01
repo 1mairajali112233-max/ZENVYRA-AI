@@ -31,6 +31,8 @@
     </button>
     <button id="settingsBtn" type="button">⚙️ Settings</button>
     <button id="aboutZenvyraBtn" type="button">ⓘ About Zenvyra</button>
+    <button id="helpSupportBtn" type="button" class="help-support-btn"><span class="hs-title">💬 Help &amp; Support</span><small>Facing an issue or need help? Contact Zenvyra AI Support.</small></button>
+    <button id="shortcutKeysBtn" type="button" class="help-support-btn"><span class="hs-title">⌨️ Shortcut Keys</span><small>View Zenvyra shortcuts and commands.</small></button>
   </div>
 </aside>
 
@@ -214,7 +216,7 @@
         <li>AI Answer Checker</li>
         <li>Class Performance Analyzer</li>
         <li>Weak Topic Finder</li>
-        <li>Report Card — Picture</li>
+        <li>Learning Objectives</li>
         <li>Student Progress</li>
         <li>Homework Creator</li>
         <li>Student Report Generator</li>
@@ -240,6 +242,47 @@
     </div>
 
     <div class="founder"><strong>Created by Mairaj Ali — Founder &amp; CEO of Zenvyra AI</strong><span>Zenvyra AI is an independent education platform.</span></div>
+  </div>
+</div>
+
+<!-- Help & Support -->
+<div id="helpSupportModal" class="modal" hidden>
+  <div class="small-modal help-support" role="dialog" aria-modal="true" aria-labelledby="helpSupportTitle">
+    <button class="close-modal" id="closeHelpSupportModal" type="button" aria-label="Close Help &amp; Support">×</button>
+    <h2 id="helpSupportTitle">💬 Help &amp; Support</h2>
+    <p class="hs-lead"><strong>We're here to help.</strong></p>
+    <p class="hint">Having an issue, found a bug, or need help using Zenvyra AI? Send us a message and tell us what happened.</p>
+
+    <label for="helpName">Name
+      <input id="helpName" type="text" autocomplete="name" maxlength="80" placeholder="Enter your name">
+    </label>
+    <label for="helpEmail">Email
+      <input id="helpEmail" type="email" autocomplete="email" maxlength="120" placeholder="Enter your email">
+    </label>
+    <label for="helpSubject">Subject
+      <input id="helpSubject" type="text" maxlength="120" placeholder="What do you need help with?">
+    </label>
+    <label for="helpMessage">Message
+      <textarea id="helpMessage" rows="5" maxlength="3000" placeholder="Describe your issue or question..."></textarea>
+    </label>
+
+    <p id="helpSupportMsg" role="status" aria-live="polite"></p>
+    <div class="hs-actions">
+      <button id="helpSendBtn" type="button" class="primary">Send Message</button>
+      <button id="helpCancelBtn" type="button" class="secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shortcut Keys -->
+<div id="shortcutKeysModal" class="modal" hidden>
+  <div class="small-modal shortcut-keys" role="dialog" aria-modal="true" aria-labelledby="shortcutKeysTitle">
+    <button class="close-modal" id="closeShortcutKeysModal" type="button" aria-label="Close Shortcut Keys">×</button>
+    <h2 id="shortcutKeysTitle">⌨️ Shortcut Keys</h2>
+    <p class="hint">Quick commands to use Zenvyra AI faster.</p>
+    <input id="shortcutSearch" type="text" autocomplete="off" placeholder="Search shortcuts..." aria-label="Search shortcuts">
+    <div id="shortcutList" class="shortcut-list"></div>
+    <p id="shortcutEmpty" class="shortcut-empty" hidden>No shortcuts found.</p>
   </div>
 </div>
 

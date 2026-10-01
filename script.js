@@ -36,7 +36,7 @@ const TEACHER_TOOLS=[
 {id:"answer-checker",icon:"✅",title:"AI Answer Checker",desc:"Evaluate a student's answer and explain what to improve.",steps:[["question","Question","Enter the question.","textarea"],["correct","Expected answer","Enter the model/correct answer.","textarea"],["student","Student answer","Paste the student's answer.","textarea"]],export:[]},
 {id:"class-performance",icon:"📊",title:"Class Performance Analyzer",desc:"Turn scores into class-level insights and priorities.",steps:[["scores","Class scores","Paste names and scores, one per line.","textarea"],["assessment","Assessment","What test or assessment was this?","text"],["goal","Analysis goal","Choose what you need.","options",["Identify Weak Areas","Plan Remediation","Compare Performance","Full Analysis"]]],export:["pdf","docx"]},
 {id:"weak-topic-finder",icon:"🎯",title:"Weak Topic Finder",desc:"Identify topics students struggle with from evidence.",steps:[["subject","Subject","Choose the subject.","select",S7],["evidence","Evidence","Describe results, mistakes or common errors.","textarea"],["action","Next action","What should the AI prioritize?","options",["Topics Only","Topics + Reasons","Topics + Remediation"]]],export:["pdf","docx"]},
-{id:"report-card-picture",icon:"🖼️",title:"Report Card — Picture",desc:"Upload a report card image and fill the requested information directly into it.",steps:[["photo","Upload report card","Choose a clear PNG, JPG or WEBP image.","file"],["name","Student Name","Enter the student's name.","text"],["class","Class","Enter the student's class.","text"],["parentsName","Parents Name","Enter the parent's name.","text"],["description","Description","Enter the description if the report card asks for one.","textarea"]],export:["pdf","docx"]},
+{id:"learning-objectives",icon:"🎓",title:"Learning Objectives",desc:"Create clear and measurable learning objectives for any lesson or topic.",optional:["instructions"],steps:[["subject","Subject","Choose the subject.","select",S8],["class","Grade / Class","Choose the class.","select",G14],["topic","Topic / Lesson","Enter the topic or lesson.","text"],["count","Number of objectives","How many objectives do you need?","select",["3","4","5","6","8","10"]],["instructions","Optional instructions","Anything specific to include or avoid? You can leave this blank.","textarea"]],export:["pdf","docx"]},
 {id:"student-progress",icon:"📈",title:"Student Progress",desc:"Summarize one student's progress over time.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",G12],["notes","Progress evidence","Scores, observations, attendance, strengths and concerns.","textarea"],["focus","Focus","Choose the report focus.","options",["Academic Progress","Support Plan","Parent Summary","Full Progress Review"]]],export:["pdf","docx"]},
 {id:"homework-creator",icon:"🏠",title:"Homework Creator",desc:"Create meaningful homework matched to class and topic.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S7],["topic","Topic","Enter the homework topic.","text"],["difficulty","Difficulty","Choose the challenge.","options",["Easy","Medium","Hard","Mixed"]],["count","Number of tasks","How many tasks?","select",["5","10","15","20"]]],export:["pdf","docx"]},
 {id:"student-report",icon:"📄",title:"Student Report Generator",desc:"Create a formal, teacher-ready student report.",steps:[["name","Student name","Enter the student name.","text"],["class","Class","Choose the class.","select",G12],["details","Student details","Performance, attendance, behavior, strengths and weaknesses.","textarea"],["tone","Report style","Choose the tone.","options",["Formal","Supportive","Parent Friendly","Detailed"]]],export:["pdf","docx"]},
@@ -264,7 +264,7 @@ function validateStep(){
     const key=s[0];
     const value=readCurrent();
 
-    if(!value){
+    if(!value&&!(currentTool.optional||[]).includes(key)){
         $("wizardStatus").textContent="Please complete this step before continuing.";
         $("wizardStatus").className="wizard-status error";
         return false;
@@ -333,37 +333,42 @@ async function generateTool(){
                 body:JSON.stringify({
                     base64Data:base64,
                     mediaType:file.type,
-                    prompt:`You are filling a student report card.
+                   prompt:`Read this student report card image and extract the information from it.
 
-Look carefully at the uploaded report card image and identify the locations of these fields:
-1. Student Name
-2. Class
-3. Parents Name
-4. Description
+The uploaded image is ONLY for reading.
+Do NOT write anything on the uploaded image.
+Do NOT return coordinates.
+Do NOT return x, y, width or height.
 
-Return ONLY valid JSON in this exact format:
+The report card can be from ANY school and can have ANY design or layout.
+
+Return ONLY valid JSON:
 
 {
-  "fields":{
-    "name":{"x":0,"y":0,"width":0,"height":0},
-    "class":{"x":0,"y":0,"width":0,"height":0},
-    "parentsName":{"x":0,"y":0,"width":0,"height":0},
-    "description":{"x":0,"y":0,"width":0,"height":0}
-  }
+  "studentName": "",
+  "fatherName": "",
+  "motherName": "",
+  "schoolName": "",
+  "class": "",
+  "section": "",
+  "rollNumber": "",
+  "academicYear": "",
+  "subjects": [],
+  "totalMarks": "",
+  "obtainedMarks": "",
+  "percentage": "",
+  "grade": "",
+  "attendance": "",
+  "remarks": ""
 }
 
-IMPORTANT:
-- x, y, width and height must be normalized numbers between 0 and 1.
-- x and y represent the top-left corner of the area where the text should be written.
-- width and height represent the available writing area.
-- Find the blank area next to the matching label.
-- Do not invent fields.
-- Return ONLY JSON.
-
-Student Name to write: ${currentAnswers.name||""}
-Class to write: ${currentAnswers.class||""}
-Parents Name to write: ${currentAnswers.parentsName||""}
-Description to write: ${currentAnswers.description||""}`
+Rules:
+- Read only information visible in the image.
+- Do not invent information.
+- If something is not visible, leave it empty.
+- Read subject names and marks carefully.
+- Support different schools and different report-card designs.
+- Return ONLY JSON.`
                 })
             });
 
@@ -467,6 +472,34 @@ Description to write: ${currentAnswers.description||""}`
                 sections:[{
                     heading:"Zenvyra's Analysis",
                     items:[d.data.reply]
+                }]
+            };
+        }
+        else if(currentTool.id==="learning-objectives"){
+            const a=currentAnswers;
+            const extra=(a.instructions||"").trim();
+            const reply=await askChat(
+`Create exactly ${a.count} clear, measurable learning objectives for this lesson.
+
+Subject: ${a.subject}
+Grade/Class: ${a.class}
+Topic/Lesson: ${a.topic}
+${extra?`Additional instructions from the teacher: ${extra}\n`:""}
+Rules:
+- Write exactly ${a.count} numbered objectives.
+- Start each objective with "Students will be able to" followed by a measurable action verb (for example: define, explain, solve, compare, identify, calculate, describe, analyze, create).
+- Do not use vague verbs such as "understand", "know", "learn" or "appreciate".
+- Make every objective specific to the topic and suitable for the grade level.
+- Vary the thinking level across the objectives where it makes sense (recall, understanding, application, analysis).
+- Output only the numbered list. No introduction and no closing remarks.`
+            );
+
+            result={
+                title:"Learning Objectives",
+                subtitle:`${a.subject} • ${a.class} • ${a.topic}`,
+                sections:[{
+                    heading:"Learning Objectives",
+                    items:[reply]
                 }]
             };
         }
@@ -760,7 +793,44 @@ function createFilledReportCard(file, fields, values){
         img.src=URL.createObjectURL(file);
     });
 }
+const ZENVYRA_SHORTCUTS = {
+    "/sn": "School Notes",
+    "/qs": "Quiz Generate",
+    "/ex": "Topic Explain",
+    "/ms": "Math Solve",
+    "/sm": "Summarize",
+    "/tr": "Translate",
+    "/gr": "Grammar Fix",
+    "/hw": "Homework Help",
+    "/rp": "Revision Practice",
+    "/sp": "Study Plan",
+    "/fp": "Formula Practice",
+    "/es": "English Speaking",
+    "/ws": "Writing Support",
+    "/sc": "Science Help",
+    "/his": "History Notes",
+    "/geo": "Geography Help",
+    "/def": "Definition",
+    "/eg": "Examples",
+    "/ans": "Answer Checker",
+    "/step": "Step-by-Step Solution"
+};
+function detectZenvyraShortcut(text) {
+    const value = text.trim().toLowerCase();
 
+    if (!value.startsWith("/")) return null;
+
+    const shortcut = value.split(/\s+/)[0];
+
+    if (ZENVYRA_SHORTCUTS[shortcut]) {
+        return {
+            shortcut: shortcut,
+            name: ZENVYRA_SHORTCUTS[shortcut]
+        };
+    }
+
+    return null;
+}
 async function askChat(message){
     const question = String(message || "").trim().toLowerCase();
 
@@ -1414,6 +1484,134 @@ document.querySelectorAll(".modal").forEach(m=>{
 })();
 
 /* =========================
+   HELP & SUPPORT (mailto)
+   ========================= */
+(function initHelpSupport(){
+    const SUPPORT_EMAIL="zenvyraaisupport@gmail.com";
+    const modal=$("helpSupportModal");
+    const openBtn=$("helpSupportBtn");
+    const closeBtn=$("closeHelpSupportModal");
+    const cancelBtn=$("helpCancelBtn");
+    const sendBtn=$("helpSendBtn");
+    const msg=$("helpSupportMsg");
+    if(!modal||!openBtn)return;
+
+    const fields={
+        name:$("helpName"),
+        email:$("helpEmail"),
+        subject:$("helpSubject"),
+        message:$("helpMessage")
+    };
+
+    function setMsg(text,type){
+        msg.textContent=text||"";
+        msg.className=type||"";
+    }
+
+    function openHelp(){
+        if(isMobile())closeSidebar();
+        setMsg("");
+        /* Pre-fill from the saved profile when available (editable) */
+        const p=profile();
+        if(p){
+            if(!fields.name.value&&p.name)fields.name.value=p.name;
+            if(!fields.email.value&&p.email)fields.email.value=p.email;
+        }
+        modal.hidden=false;
+        const card=modal.querySelector(".small-modal");
+        if(card)card.scrollTop=0;
+        setTimeout(()=>{(fields.name.value?fields.subject:fields.name).focus()},50);
+    }
+
+    function closeHelp(){
+        modal.hidden=true;
+        setMsg("");
+    }
+
+    function send(){
+        const name=fields.name.value.trim();
+        const email=fields.email.value.trim();
+        const subject=fields.subject.value.trim();
+        const message=fields.message.value.trim();
+
+        if(!name){setMsg("Please enter your name.","error");fields.name.focus();return}
+        if(!email){setMsg("Please enter your email.","error");fields.email.focus();return}
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setMsg("Please enter a valid email address.","error");fields.email.focus();return}
+        if(!subject){setMsg("Please enter a subject.","error");fields.subject.focus();return}
+        if(!message){setMsg("Please enter your message.","error");fields.message.focus();return}
+
+        const mailSubject=`Zenvyra AI Support — ${subject}`;
+        const body=
+`Zenvyra AI Support
+
+Name: ${name}
+
+Email: ${email}
+
+Issue: ${subject}
+
+Message:
+${message}
+
+Thank you,
+Zenvyra AI User`;
+
+        const url=`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(body)}`;
+
+        /* mailto only opens the email app; it cannot confirm delivery */
+        window.location.href=url;
+        setMsg("Your email app is ready. Review the message and send it to Zenvyra AI Support.","success");
+    }
+
+    openBtn.addEventListener("click",openHelp);
+    if(closeBtn)closeBtn.addEventListener("click",closeHelp);
+    if(cancelBtn)cancelBtn.addEventListener("click",closeHelp);
+    if(sendBtn)sendBtn.addEventListener("click",send);
+})();
+
+/* =========================
+   SHORTCUT KEYS (reference list built from ZENVYRA_SHORTCUTS)
+   ========================= */
+(function initShortcutKeys(){
+    const modal=$("shortcutKeysModal");
+    const openBtn=$("shortcutKeysBtn");
+    const closeBtn=$("closeShortcutKeysModal");
+    const list=$("shortcutList");
+    const search=$("shortcutSearch");
+    const empty=$("shortcutEmpty");
+    if(!modal||!openBtn||!list)return;
+
+    const entries=Object.entries(ZENVYRA_SHORTCUTS);
+
+    function render(filter){
+        const q=(filter||"").trim().toLowerCase();
+        const rows=entries.filter(([cmd,name])=>!q||cmd.toLowerCase().includes(q)||name.toLowerCase().includes(q));
+        list.innerHTML=rows.map(([cmd,name])=>
+            `<div class="shortcut-row"><code>${escapeHtml(cmd)}</code><span>${escapeHtml(name)}</span></div>`
+        ).join("");
+        if(empty)empty.hidden=rows.length>0;
+    }
+
+    function openShortcuts(){
+        if(isMobile())closeSidebar();
+        if(search)search.value="";
+        render("");
+        modal.hidden=false;
+        const card=modal.querySelector(".small-modal");
+        if(card)card.scrollTop=0;
+        if(search)setTimeout(()=>search.focus(),50);
+    }
+
+    function closeShortcuts(){modal.hidden=true}
+
+    openBtn.addEventListener("click",openShortcuts);
+    if(closeBtn)closeBtn.addEventListener("click",closeShortcuts);
+    if(search)search.addEventListener("input",()=>render(search.value));
+    modal.addEventListener("click",e=>{if(e.target===modal)closeShortcuts()});
+    document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!modal.hidden)closeShortcuts()});
+})();
+
+/* =========================
    SETTINGS — ONE authoritative implementation
    settingsBtn, profile, appearance, accent, save, picture, logout
    ========================= */
@@ -1567,6 +1765,8 @@ document.querySelectorAll(".modal").forEach(m=>{
         if(modal&&!modal.hidden){closeSettings();return}
         const about=$("aboutModal");
         if(about&&!about.hidden){about.hidden=true;return}
+        const help=$("helpSupportModal");
+        if(help&&!help.hidden){help.hidden=true;return}
         if($("sidebar").classList.contains("open")&&isMobile())closeSidebar();
     });
 
