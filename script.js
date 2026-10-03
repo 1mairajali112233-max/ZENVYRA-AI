@@ -1883,6 +1883,82 @@ Zenvyra AI User`;
     /* Logout (existing Supabase logOut()) */
     const logoutBtn=$("logoutBtn");
     if(logoutBtn)logoutBtn.onclick=logOut;
+    /* Delete Account */
+const deleteAccountBtn = $("deleteAccountBtn");
+
+if(deleteAccountBtn){
+    deleteAccountBtn.onclick = async () => {
+        const confirmed = confirm(
+            "Delete your Zenvyra AI account permanently?\n\n" +
+            "Your account and saved account data will be deleted. " +
+            "This action cannot be undone."
+        );
+
+        if(!confirmed) return;
+
+        deleteAccountBtn.disabled = true;
+        deleteAccountBtn.textContent = "Deleting...";
+
+        try{
+            const { data: { session } } =
+                await supabaseClient.auth.getSession();
+
+            const token = session?.access_token;
+
+            if(!token){
+                throw new Error("Your session has expired. Please sign in again.");
+            }
+
+            const response = await fetch(
+                `${API_BASE}/auth/account`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    credentials: "include"
+                }
+            );
+
+            const result = await response.json().catch(() => null);
+
+            if(!response.ok || !result?.success){
+                throw new Error(
+                    result?.message || "Could not delete your account."
+                );
+            }
+
+            await supabaseClient.auth.signOut().catch(() => {});
+
+            localStorage.removeItem(USER_PROFILE_KEY);
+            localStorage.removeItem(LOGGED_IN_KEY);
+            localStorage.removeItem(WELCOME_SEEN_KEY);
+            localStorage.removeItem(CHAT_SESSIONS_KEY);
+
+            if($("settingsModal")){
+                $("settingsModal").hidden = true;
+            }
+
+            closeSidebar();
+
+            const shell = document.querySelector(".shell");
+            if(shell) shell.style.display = "none";
+
+            $("loginScreen").hidden = false;
+            setLoginMode("signup");
+
+            alert("Your Zenvyra AI account has been permanently deleted.");
+
+        }catch(err){
+            console.error("Delete account error:", err);
+
+            deleteAccountBtn.disabled = false;
+            deleteAccountBtn.textContent = "🗑️ Delete Account";
+
+            alert(err.message || "Could not delete your account.");
+        }
+    };
+}
 
     /* Load saved appearance + picture */
     applyTheme(savedTheme);
