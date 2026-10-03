@@ -1433,7 +1433,9 @@ async function logOut(){
     localStorage.removeItem(USER_PROFILE_KEY);
     localStorage.removeItem(LOGGED_IN_KEY);
     localStorage.removeItem(WELCOME_SEEN_KEY);
-
+    localStorage.removeItem(CHAT_SESSIONS_KEY);
+    localStorage.removeItem(PICTURE_KEY);
+    
     if($("settingsModal"))$("settingsModal").hidden=true;
     closeSidebar();
 
