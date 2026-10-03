@@ -1910,7 +1910,7 @@ if(deleteAccountBtn){
             }
 
             const response = await fetch(
-                `${API_BASE}/auth/account`,
+                `${API_BASE}/api/auth/account`,
                 {
                     method: "DELETE",
                     headers: {
