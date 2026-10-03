@@ -7,7 +7,11 @@
 const express = require("express");
 const router = express.Router();
 
-const { supabaseAnon, getOrCreateProfile } = require("../services/supabase.service");
+const {
+  supabaseAnon,
+  supabaseAdmin,
+  getOrCreateProfile,
+} = require("../services/supabase.service");
 const { requireAuth } = require("../middleware/requireAuth");
 const { success, fail } = require("../utils/apiResponse");
 
@@ -96,6 +100,37 @@ router.post("/logout", requireAuth, async (req, res) => {
     // Logging out should basically never fail the user's flow client-side —
     // the frontend discards its local token regardless.
     return success(res, { loggedOut: true });
+  }
+});
+// DELETE /api/auth/account
+// Permanently deletes the authenticated user's account and known user data.
+router.delete("/account", requireAuth, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Delete app data first.
+    await supabaseAdmin
+      .from("usage_daily")
+      .delete()
+      .eq("user_id", userId);
+
+    await supabaseAdmin
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
+
+    // Permanently delete the Supabase Auth account.
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+    if (error) {
+      console.error("account deletion error:", error.message);
+      return fail(res, "Could not delete your account.", 500);
+    }
+
+    return success(res, { deleted: true });
+  } catch (err) {
+    console.error("account deletion error:", err.message);
+    return fail(res, "Could not delete your account.", 500);
   }
 });
 
