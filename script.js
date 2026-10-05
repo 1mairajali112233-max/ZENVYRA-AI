@@ -514,8 +514,9 @@ Rules:
                 },
                 body:JSON.stringify({
                     toolId:currentTool.id,
-                    toolTitle:currentTool.title,
-                    answers:answersForApi
+toolTitle:currentTool.title,
+answers:answersForApi,
+conversationContext: activeSession?.messages?.slice(-10) || []
                 })
             });
 
@@ -831,21 +832,84 @@ function detectZenvyraShortcut(text) {
 
     return null;
 }
-async function askChat(message){
-    const question = String(message || "").trim().toLowerCase();
+async function askChat(message, history = []){
+    const rawQuestion = String(message || "").trim();
+    const question = rawQuestion.toLowerCase();
 
     // Zenvyra identity protection
-    if (
-        question.includes("who created you") ||
-        question.includes("who made you") ||
-        question.includes("who is your creator") ||
-        question.includes("who is your founder") ||
-        question.includes("who built you") ||
-        question.includes("who developed you") ||
-        question.includes("who owns you")
-    ) {
-        return "I’m Zenvyra AI, created by Mairaj Ali — Founder & CEO of Zenvyra AI.\n\nI was built with one simple vision: to make learning smarter, simpler, and more enjoyable for everyone.";
+    // Zenvyra identity protection
+const creatorQuestionPatterns = [
+    "who created you",
+    "who made you",
+    "who built you",
+    "who developed you",
+    "who is your creator",
+    "who is your founder",
+    "who is your owner",
+    "who is behind you",
+    "who created this",
+    "who made this",
+    "who built this",
+    "who developed this",
+
+    "tumhe kisne banaya",
+    "tumhein kisne banaya",
+    "tumko kisne banaya",
+    "tum ko kisne banaya",
+    "tum kisne banaya",
+    "tum kis ne banaya",
+    "tuma kisne banaya",
+    "tuma kis na banaya",
+    "tumhe kis ne banaya",
+    "tumhein kis ne banaya",
+
+    "tumhara creator",
+    "tumhara founder",
+    "tumhara owner",
+    "tumhara developer",
+    "tum kiski creation ho",
+
+    "kisne tumhe banaya",
+    "kisne tumhein banaya",
+    "kisne tumhe develop kiya",
+    "kisne ye ai banai",
+    "kisne ye ai banaya",
+    "kisne ye app banai",
+    "kisne ye app banaya",
+
+    "zenvyra kisne banaya",
+    "zenvyra kisne banai",
+    "zenvyra ka creator",
+    "zenvyra ka founder",
+    "zenvyra ka owner",
+    "zenvyra ka developer",
+    "zenvyra kiski creation hai",
+
+    "who is mairaj ali",
+    "what did mairaj ali create",
+    "mairaj ali ne kya banaya",
+    "mairaj ali kaun hai"
+];
+
+const isCreatorQuestion =
+    question.includes("mairaj ali") ||
+    creatorQuestionPatterns.some(pattern => question.includes(pattern));
+    if(isCreatorQuestion){
+        return "I’m Zenvyra AI, created by Mairaj Ali — CEO & FOUNDER  of Zenvyra AI.";
     }
+
+    // Previous conversation context
+    const context = history
+        .filter(m => m && m.q && m.a && m.a !== "Thinking…")
+        .slice(-10)
+        .map((m, i) =>
+            `Previous exchange ${i + 1}:\nUser: ${m.q}\nZenvyra AI: ${m.a}`
+        )
+        .join("\n\n");
+
+    const contextualMessage = context
+        ? `Previous conversation:\n${context}\n\nCurrent user question:\n${rawQuestion}`
+        : rawQuestion;
 
     const h = await authHeaders();
 
@@ -857,57 +921,35 @@ async function askChat(message){
         },
         credentials:"include",
         body:JSON.stringify({
-            system:"You are Zenvyra AI, a professional education assistant. You are Zenvyra AI, not Gemini. Never claim that Google created Zenvyra AI.",
-            message:message
+            system:`You are Zenvyra AI, a professional education assistant.
+
+You are Zenvyra AI, not Gemini. Never claim that Google created Zenvyra AI.
+
+Use the previous conversation context when answering follow-up questions. If the user asks something short such as "simplify", "explain it", "make it shorter", "give examples", "why", or "what about this", understand what they are referring to from the previous conversation.
+
+Zenvyra AI was created by Mairaj Ali, Founder & CEO of Zenvyra AI.`,
+            message:contextualMessage
         })
     });
 
-    const contentType = r.headers.get("content-type") || "";
-    const raw = await r.text();
-
-    console.log("Zenvyra /api/chat status:", r.status);
-    console.log("Zenvyra /api/chat response:", raw);
-
-    if(!contentType.includes("application/json")){
-        throw Error(
-            `Server returned HTML instead of JSON (${r.status}). Check that Railway backend is running.`
-        );
-    }
-
-    let d;
-
-    try{
-        d = JSON.parse(raw);
-    }catch{
-        throw Error("Server returned invalid JSON.");
-    }
+    const d = await r.json().catch(()=>({}));
 
     if(!r.ok){
-        throw Error(
-            d?.message ||
+        throw new Error(
             d?.error ||
-            `AI request failed (${r.status}).`
-        );
-    }
-
-    if(!d?.success){
-        throw Error(
             d?.message ||
-            d?.error ||
-            "AI request failed."
+            "Sorry, I couldn't connect right now."
         );
     }
 
     const reply = d?.data?.reply;
 
-    if(typeof reply !== "string" || !reply.trim()){
-        console.error("Unexpected /api/chat JSON:", d);
-        throw Error("AI server returned no reply.");
+    if(!reply){
+        throw new Error("No response received.");
     }
 
     return reply;
 }
-
 /* =========================
    CHAT HISTORY (storage + logic unchanged; markup restyled)
    ========================= */
@@ -1026,7 +1068,10 @@ async function sendChat(){
     renderChat();
 
     try{
-        activeSession.messages.at(-1).a=await askChat(q);
+        activeSession.messages.at(-1).a=await askChat(
+    q,
+    activeSession.messages.slice(0,-1)
+);
     }catch(e){
         activeSession.messages.at(-1).a=e.message||"Sorry, I couldn't connect right now.";
     }

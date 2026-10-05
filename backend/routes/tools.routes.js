@@ -41,7 +41,7 @@ function cleanResult(raw,toolTitle){
 
 router.post("/generate",requireAuth,usageLimit("messages"),async(req,res)=>{
   try{
-    const {toolId,toolTitle,answers}=req.body||{};
+   const {toolId,toolTitle,answers,conversationContext}=req.body||{};
     if(!toolId||!toolTitle||!answers)return fail(res,"Tool details are required.",400);
     const instruction=TOOL_INSTRUCTIONS[toolId];
     if(!instruction)return fail(res,"This tool is not configured.",400);
@@ -61,7 +61,23 @@ ${instruction}
 Return ONLY valid JSON with this exact shape:
 {"title":"string","subtitle":"string","sections":[{"heading":"string","items":["string"]}]}
 Use concise but complete content. Do not use markdown fences.`;
-    const message=`Tool: ${toolTitle}\nUser requirements:\n${answerText}`;
+   const contextText = Array.isArray(conversationContext)
+  ? conversationContext
+      .filter(m => m && m.q && m.a)
+      .slice(-10)
+      .map(m => `User: ${m.q}\nZenvyra AI: ${m.a}`)
+      .join("\n\n")
+  : "";
+
+const message = `Tool: ${toolTitle}
+
+${contextText ? `Previous conversation:
+${contextText}
+
+` : ""}User requirements:
+${answerText}
+
+Use the previous conversation when the user's current request refers to something discussed earlier.`;
     const parsed=await ai.chatJson({system,message});
     return success(res,cleanResult(parsed,toolTitle));
   }catch(err){console.error("tool generation error:",err.message);return aiFailure(res,err)}
