@@ -10,12 +10,33 @@ const DEFAULT_PICTURE="data:image/svg+xml;utf8,"+encodeURIComponent("<svg xmlns=
 const MOBILE_BP=900;
 let selectedRole="",loginMode="signup",activeSession=null,currentTool=null,currentAnswers={},currentResult=null,generating=false,exporting=false;
 
-/* Shared option lists (identical values to the original per-tool lists) */
-const G12=Array.from({length:12},(_,i)=>`Grade ${i+1}`);
-const G14=["Nursery","KG",...G12];
-const S8=["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies","General Knowledge"];
-const S7=["Mathematics","English","Science","Computer","Sindhi","Urdu","Social Studies"];
-const S6=["Mathematics","English","Science","Computer","Sindhi","Urdu"];
+/* Shared option lists */
+const G12=[
+  "Nursery","KG",
+  "Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6",
+  "Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"
+];
+
+const G14=[
+  "Nursery","KG",
+  "Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6",
+  "Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"
+];
+
+const S8=[
+  "Mathematics","English","Science","Computer",
+  "Sindhi","Urdu","Social Studies","General Knowledge"
+];
+
+const S7=[
+  "Mathematics","English","Science","Computer",
+  "Sindhi","Urdu","Social Studies"
+];
+
+const S6=[
+  "Mathematics","English","Science","Computer",
+  "Sindhi","Urdu"
+];
 
 const STUDENT_TOOLS=[
 {id:"quiz-generator",icon:"📝",title:"Quiz Generator",desc:"Create a tailored quiz with questions, difficulty and types.",steps:[["class","What class are you in?","Select your class.","select",G14],["subject","Which subject?","Choose the subject.","select",S8],["topic","What topic should the quiz cover?","Enter a chapter, lesson or topic.","text"],["count","How many questions?","Choose the number of questions.","select",["5","10","15","20"]],["type","Choose question type","Select the assessment format.","options",["MCQ","Short Answer","Long Answer","True-False","Mixed"]],["difficulty","Choose difficulty","Match the level to your learners.","options",["Easy","Medium","Hard","Mixed"]]],export:["pdf","docx"]},
@@ -30,7 +51,7 @@ const STUDENT_TOOLS=[
 {id:"presentation",icon:"📊",title:"Presentation Maker",desc:"Create a classroom-ready presentation with real PPTX export.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S8],["topic","Topic","What should the presentation teach?","text"],["slides","Number of slides","Choose the slide count.","select",["5","7","10","12","15"]],["style","Presentation style","Choose the visual/content approach.","options",["Clean Academic","Interactive Classroom","Exam Review","Storytelling"]]],export:["pptx"]}];
 
 const TEACHER_TOOLS=[
-{id:"question-paper",icon:"📋",title:"Question Paper Maker",desc:"Build a balanced exam with marks, duration and difficulty.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S8],["topic","Chapter / topic","What content should be assessed?","text"],["marks","Total marks","Set the total marks.","select",["20","30","40","50","75","100"]],["duration","Exam duration","Choose the exam time.","select",["30 minutes","45 minutes","60 minutes","90 minutes","120 minutes","180 minutes"]],["types","Question types","Select the mix.","options",["MCQ + Short","MCQ + Short + Long","Short + Long","Mixed"]],["difficulty","Difficulty","Choose the difficulty.","options",["Easy","Medium","Hard","Mixed"]]],export:["pdf","docx"]},
+{id:"question-paper",icon:"📋",title:"Question Paper Maker",desc:"Build a balanced exam with marks, duration and difficulty.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S8],["topic","Chapter / topic","What content should be assessed?","text"],["marks","Total marks","Enter the total marks.","text"],["duration","Exam duration","Enter the exam duration.","text"],["types","Question types","Select the mix.","options",["MCQ + Short","MCQ + Short + Long","Short + Long","Mixed"]],["difficulty","Difficulty","Choose the difficulty.","options",["Easy","Medium","Hard","Mixed"]]],export:["pdf","docx"]},
 {id:"worksheet",icon:"📑",title:"Worksheet Maker",desc:"Create printable practice material for your class.",steps:[["class","Class","Choose the class.","select",G12],["subject","Subject","Choose the subject.","select",S7],["topic","Topic","Enter the topic.","text"],["difficulty","Difficulty","Choose the challenge level.","options",["Easy","Medium","Hard","Mixed"]],["count","Number of questions","Choose the number.","select",["5","10","15","20","25","30"]],["type","Question type","Choose the format.","options",["MCQ","Short Answer","Long Answer","True-False","Mixed"]]],export:["pdf","docx"]},
 {id:"lesson-plan",icon:"🗂️",title:"Lesson Plan Generator",desc:"Plan objectives, instruction, activities and assessment.",steps:[["class","Class","Choose the class.","select",G14],["subject","Subject","Choose the subject.","select",S8],["topic","Topic","Enter the lesson topic.","text"],["duration","Duration","Choose the lesson duration.","select",["30 minutes","40 minutes","45 minutes","60 minutes","90 minutes"]],["objectives","Learning objectives","What should students be able to do?","textarea"],["approach","Teaching approach","Choose the teaching approach.","options",["Direct Instruction","Inquiry Based","Collaborative","Activity Based","Mixed"]]],export:["pdf","docx"]},
 {id:"answer-checker",icon:"✅",title:"AI Answer Checker",desc:"Evaluate a student's answer and explain what to improve.",steps:[["question","Question","Enter the question.","textarea"],["correct","Expected answer","Enter the model/correct answer.","textarea"],["student","Student answer","Paste the student's answer.","textarea"]],export:[]},
@@ -67,26 +88,75 @@ function escapeHtml(s=""){
     }[c]));
 }
 
-function renderMarkdown(text=""){
-    /* Code fences are pulled out first so their line breaks are preserved */
-    const blocks=[];
-    let s=escapeHtml(text).replace(/```[a-zA-Z0-9_-]*\n?([\s\S]*?)```/g,(_,code)=>{
-        blocks.push(code.replace(/\n$/,""));
-        return `@@CODEBLOCK${blocks.length-1}@@`;
-    });
+function renderMarkdown(text = "") {
+    // Clean mathematical formatting
+    function cleanMath(value) {
+        let s = String(value ?? "");
 
-    s=s
-        .replace(/^### (.*)$/gm,"<h4>$1</h4>")
-        .replace(/^## (.*)$/gm,"<h3>$1</h3>")
-        .replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")
-        .replace(/`([^`\n]+)`/g,"<code>$1</code>")
-        .replace(/^\s*[-*]\s+(.*)$/gm,"<li>$1</li>")
-        .replace(/(<\/(?:h3|h4|li)>)\n/g,"$1")
-        .replace(/\n/g,"<br>");
+        // Remove LaTeX math delimiters
+        s = s
+            .replace(/\$\$([\s\S]*?)\$\$/g, "$1")
+            .replace(/\$([^$\n]+)\$/g, "$1")
+            .replace(/\\\[([\s\S]*?)\\\]/g, "$1")
+            .replace(/\\\(([\s\S]*?)\\\)/g, "$1");
 
-    return s.replace(/@@CODEBLOCK(\d+)@@/g,(_,i)=>`<pre><code>${blocks[Number(i)]}</code></pre>`);
+        // Convert common LaTeX symbols
+        s = s
+            .replace(/\\cdot\b/g, "·")
+            .replace(/\\times\b/g, "×")
+            .replace(/\\div\b/g, "÷")
+            .replace(/\\pm\b/g, "±")
+            .replace(/\\leq?\b/g, "≤")
+            .replace(/\\geq?\b/g, "≥")
+            .replace(/\\neq\b/g, "≠")
+            .replace(/\\approx\b/g, "≈")
+            .replace(/\\pi\b/g, "π")
+            .replace(/\\sqrt\{([^{}]+)\}/g, "√($1)")
+            .replace(/\\left\b/g, "")
+            .replace(/\\right\b/g, "")
+            .replace(/\\,/g, " ")
+            .replace(/\\!/g, "")
+            .replace(/\\;/g, " ");
+
+        // Convert powers into superscript characters
+        const superscripts = {
+            "0": "⁰", "1": "¹", "2": "²",
+            "3": "³", "4": "⁴", "5": "⁵",
+            "6": "⁶", "7": "⁷", "8": "⁸",
+            "9": "⁹", "+": "⁺", "-": "⁻"
+        };
+
+        s = s.replace(/\^([0-9+-]+)/g, (_, power) =>
+            [...power].map(char => superscripts[char] || char).join("")
+        );
+
+        return s;
+    }
+
+    const blocks = [];
+
+    let s = escapeHtml(cleanMath(text)).replace(
+        /```[a-zA-Z0-9_-]*\n?([\s\S]*?)```/g,
+        (_, code) => {
+            blocks.push(code.replace(/\n$/, ""));
+            return `@@CODEBLOCK${blocks.length - 1}@@`;
+        }
+    );
+
+    s = s
+        .replace(/^### (.*)$/gm, "<h4>$1</h4>")
+        .replace(/^## (.*)$/gm, "<h3>$1</h3>")
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/`([^`\n]+)`/g, "<code>$1</code>")
+        .replace(/^\s*[-*]\s+(.*)$/gm, "<li>$1</li>")
+        .replace(/(<\/(?:h3|h4|li)>)\n/g, "$1")
+        .replace(/\n/g, "<br>");
+
+    return s.replace(
+        /@@CODEBLOCK(\d+)@@/g,
+        (_, i) => `<pre><code>${blocks[Number(i)]}</code></pre>`
+    );
 }
-
 function profile(){
     try{return JSON.parse(localStorage.getItem(USER_PROFILE_KEY)||"null")}
     catch{return null}
